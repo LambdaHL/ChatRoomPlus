@@ -9,11 +9,8 @@ public class DBOperator
 	private static final String DB_URL="jdbc:mysql://localhost:3306/UserDB?useSSL=false&serverTimezone=UTC";
 	private static final String USER="root";
     private static final String PASSWORD="123456";
-    private Connection connection;
-    private PreparedStatement preparedStatement;
     public static final int LOGIN_PWD_RIGHT=0;
     public static final int LOGIN_PWD_WRONG=1;
-    public static final int LOGIN_USERNAME_EXISITED=2;
     public static final int LOGIN_USERNAME_NOT_EXISITED=4;
     public static final int LOGIN_SQLERROR=3;
     public static final int REG_USERNAME_SUCCESS=0;
@@ -21,7 +18,9 @@ public class DBOperator
     public static final int UPDATE_PWD_SUCCESS=0;
     public static final int UPDATE_PWD_OPWD_ERROR=1;
     public static final int UPDATE_PWD_SQLERROR=2;
-
+    private Connection connection;
+    private PreparedStatement preparedStatement;
+    
     public DBOperator()
     {
         try
@@ -39,7 +38,7 @@ public class DBOperator
     {
         try
         {
-            String sql="INSERT INTO User(username,usernickname,password,icon) VALUES(?,?,?,?)";
+            String sql="INSERT INTO User(username,usernickname,password,icon,logstatus) VALUES(?,?,?,?,0)";
             preparedStatement=connection.prepareStatement(sql);
             preparedStatement.setString(1, userName);
             preparedStatement.setString(2, userNickName);
@@ -80,7 +79,13 @@ public class DBOperator
                 resultSet.next();
                 String currentPassword=resultSet.getString(1);
                 if(password.equals(currentPassword))
+                {
+                	sql="UPDATE User SET logstatus=1 WHERE username=?";
+                	preparedStatement=connection.prepareStatement(sql);
+                	preparedStatement.setString(1, userName);
+                	preparedStatement.executeUpdate();
                     return LOGIN_PWD_RIGHT;
+                }
                 else
                     return LOGIN_PWD_WRONG;
             }
@@ -96,6 +101,21 @@ public class DBOperator
         }
     }
 
+    public void logout(String userName)
+    {
+    	try
+    	{
+    		String sql="UPDATE User SET logstatus=0 WHERE username=?";
+    		preparedStatement=connection.prepareStatement(sql);
+    		preparedStatement.setString(1, userName);
+    		preparedStatement.executeUpdate();
+    	}
+    	catch (Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    }
+    
     public void updateIcon(String userName, String icon)
     {
         try
@@ -285,5 +305,24 @@ public class DBOperator
     	}
     }
     
-    
+    public boolean isLogged(String userName)
+    {
+    	try
+    	{
+    		String sql="SELECT logstatus FROM User WHERE username=?";
+    		preparedStatement=connection.prepareStatement(sql);
+    		preparedStatement.setString(1, userName);
+    		preparedStatement.executeQuery();
+    		ResultSet resultSet=preparedStatement.getResultSet();
+    		resultSet.next();
+    		if(resultSet.getInt(1)==1)
+    			return true;
+    	}
+    	catch (Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    	return false;
+    }
+
 }

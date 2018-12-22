@@ -3,9 +3,11 @@ package client;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.*;
+import java.text.SimpleDateFormat;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.io.*;
 
 public class Client extends JFrame
@@ -14,7 +16,7 @@ public class Client extends JFrame
 	private JTextField textField_UserName;
 	private JPasswordField passwordField;
 	private JLabel label_ServerStatus;
-	private Socket socket,socket2;
+	private Socket socket;
 	private JList<Object> list_UserList,list_Friends;
 	private JTextPane textPane;
 	private JEditorPane editorPane;
@@ -25,8 +27,8 @@ public class Client extends JFrame
 	private JFrame logpad;
 	private String userName,userNickName;
 	private ArrayList<User> userList=new ArrayList<User>();
-	private InputStream inputStream,inputStream2;
-	private OutputStream outputStream,outputStream2;
+	private PrintWriter printWriter;
+	private BufferedReader bufferedReader;
 	
 	public Client()
 	{
@@ -40,22 +42,23 @@ public class Client extends JFrame
 		@Override
 		public void run()
 		{
-			try
+			while(true)
 			{
-				socket=new Socket("127.0.0.1", 2018);
-				socket2=new Socket("127.0.0.1", 2019);
-				inputStream=socket.getInputStream();
-				outputStream=socket.getOutputStream();
-				inputStream2=socket2.getInputStream();
-				outputStream2=socket2.getOutputStream();
-				label_ServerStatus.setText("Server Status:Connected");
-				label_ServerStatus.setForeground(Color.GREEN);
-			}
-			catch (Exception e)
-			{
-				label_ServerStatus.setText("Server Status:Not Connected");
-				label_ServerStatus.setForeground(Color.RED);
-				e.printStackTrace();
+				try
+				{
+					socket=new Socket("127.0.0.1", 2018);
+					printWriter=new PrintWriter(socket.getOutputStream());
+					bufferedReader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+					label_ServerStatus.setText("Server Status:Connected");
+					label_ServerStatus.setForeground(Color.GREEN);
+					break;
+				}
+				catch (Exception e)
+				{
+					label_ServerStatus.setText("Server Status:Not Connected");
+					label_ServerStatus.setForeground(Color.RED);
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -63,113 +66,14 @@ public class Client extends JFrame
 	class ListenThread extends Thread
 	{
 		String string;
-		byte[] bytes;
+		int len;
 		
 		@Override
 		public void run()
 		{
 			try
 			{
-				inputStream=socket.getInputStream();
-				outputStream=socket.getOutputStream();
-				while(true)
-				{
-					bytes=new byte[1024];
-					int len;
-					if(socket.isClosed())
-						break;
-					while(inputStream.available()!=0)
-					{
-						
-						len=inputStream.read(bytes);//received onlineListString
-						string=new String(bytes, 0, len);
-						switch (string.charAt(0))
-						{
-							case '&'://Update User List
-							{
-								userList.clear();
-								//get logged user
-								String temp=string.substring(1);
-								String[] strings=temp.split("\\|");
-								for(String s:strings)
-								{
-									System.out.println(s);
-								}
-								int userCount=Integer.parseInt(strings[1]);
-								System.out.println("userCount:"+userCount);
-								
-								/*//response server that client had received previous data and ask for next
-								outputStream.write("+".getBytes());//send response signal
-								outputStream.flush();
-								
-								//receive icon
-								File iconSelfDir=new File(System.getProperty("user.dir") + "\\Client\\" + userName);
-								if(!iconSelfDir.exists())
-									iconSelfDir.mkdir();
-								File iconSelfFile=new File(System.getProperty("user.dir") + "\\Client\\" + userName + "\\usericon.png");
-								if(iconSelfFile.exists())
-									iconSelfFile.delete();
-								iconSelfFile.createNewFile();
-								DataInputStream dataInputStream=new DataInputStream(inputStream);
-								DataOutputStream dataOutputStream=new DataOutputStream(new FileOutputStream(iconSelfFile));
-								bytes=new byte[1024];
-								
-								len=dataInputStream.read(bytes);
-								dataOutputStream.write(bytes, 0, len);
-								dataOutputStream.flush();*/
-								
-								User metaUser;
-								
-								//get all user
-								for(int i=0;i<userCount;i++)
-								{
-									System.out.println("circulation entered");
-									System.out.println("available:"+inputStream.available());
-									while(inputStream.available()==0){}
-									len=inputStream.read(bytes);	//block
-									System.out.println("read complete");
-									temp=new String(bytes, 0, len);
-									String[] inStrings=temp.split("\\|");
-									outputStream.write("&".getBytes());
-									outputStream.flush();
-									
-									for(String s:strings)
-									{
-										System.out.println(s);
-									}
-									for(String s:inStrings)
-									{
-										System.out.println(s);
-									}
-									
-									File userDir=new File(System.getProperty("user.dir") + "\\Client\\" + strings[0]);//User Directory
-									if(!userDir.exists())
-										userDir.mkdir();
-									File iconFile=new File(System.getProperty("user.dir") + "\\Client\\" + strings[0] + "\\" + inStrings[0] + ".png");
-									if(iconFile.exists())
-										iconFile.delete();
-									iconFile.createNewFile();
-									DataInputStream dataInputStream=new DataInputStream(socket.getInputStream());
-									bytes=new byte[1024];
-									while(dataInputStream.available()==0) {}
-									len=dataInputStream.read(bytes);
-									System.out.println("file read complete");
-									DataOutputStream dataOutputStream=new DataOutputStream(new FileOutputStream(iconFile));
-									dataOutputStream.write(bytes, 0, len);
-									dataOutputStream.flush();
-									
-									//receive icon
-									
-									metaUser=new User(inStrings[0], inStrings[1], iconFile.getAbsolutePath(), null, null);
-									userList.add(metaUser);
-								}
-								list_UserList.setModel(new MyListModel<Object>(userList));
-								list_UserList.setCellRenderer(new MyListCellRenderer());
-								System.out.println("list set\n");
-							}
-						}
-					}
-				}
+				
 			}
 			catch (Exception e)
 			{
@@ -181,6 +85,14 @@ public class Client extends JFrame
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void createClientGUI()
 	{
+		try 
+		{
+			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		setTitle("CharRoomPlus");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -282,16 +194,16 @@ public class Client extends JFrame
 				try
 				{
 					System.out.println("closing");
-					OutputStream outputStream=socket.getOutputStream();
-					outputStream.write("~".getBytes());
-					outputStream.flush();
-					
-					byte[] bytes=new byte[1024];
-					InputStream inputStream=socket.getInputStream();
-					int len=inputStream.read(bytes);
-					socket.shutdownInput();
-					socket.shutdownOutput();
-					socket.close();
+					printWriter.println("#Logout");
+					printWriter.flush();
+					String str=bufferedReader.readLine();
+					if(str.equals("#Confirmed"))
+					{
+						socket.shutdownInput();
+						socket.shutdownOutput();
+						socket.close();
+						//super.windowClosing(e);
+					}
 				}
 				catch (Exception E)
 				{
@@ -306,100 +218,34 @@ public class Client extends JFrame
 			@Override
 			public void actionPerformed(ActionEvent e) 
 			{
-				String string=editorPane.getText();
-				sendMessage(string);
+				printWriter.println("#Message");
+				SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+				String time=simpleDateFormat.format(new Date());
+				printWriter.println(time);
+				String message=" @"+userName+" "+editorPane.getText();
+				printWriter.println(message);
+				printWriter.flush();
+				
+				//Unfinished:textpane
+				
+				textPane.setText("");
+				btn_Enter.setEnabled(false);
 			}
 		});
 
 	}
-	
-	class LoginThread extends Thread
-	{
-		private InputStream inputStream;
-		private OutputStream outputStream;
-		private	byte[] bytes;
-		private String string;
-		
-		public LoginThread() {}
-		
-		@Override
-		public void run()
-		{
-			try
-			{
-				inputStream=socket.getInputStream();
-				outputStream=socket.getOutputStream();
-				int len;
-				String pwd=new String(passwordField.getPassword());
-				string=">"+textField_UserName.getText()+"|"+pwd;
-				bytes=string.getBytes();
-				len=bytes.length;
-				outputStream.write(bytes, 0, len);
-				outputStream.flush();
-				bytes=new byte[1024];
-				boolean isResponse=false;
-				while(!isResponse)
-				{
-					len=inputStream.read(bytes);
-					string=new String(bytes);
-					switch (string.charAt(0))
-					{
-						case '^'://login success
-						{
-							logpad.setVisible(false);
-							String[] strings=(string.substring(1)).split("\\|");
-							userName=strings[0];
-							userNickName=strings[1];
-							setVisible(true);
-							addWindowListener(new WindowAdapter() {});
-							isResponse=true;
-							new ListenThread().start();
-							break;
-						}
-						
-						case '!'://login failed
-						{
-							if(string.length()==1)
-							{
-								JOptionPane.showMessageDialog(null, new JLabel("Login failed.(Incorrect password)"), "Warning", JOptionPane.INFORMATION_MESSAGE);
-								passwordField.setText("");
-								btn_Login.setEnabled(false);
-								btn_Register.setEnabled(false);
-								isResponse=true;
-								break;
-							}
-							if(string.charAt(1)=='E')
-							{
-								JOptionPane.showMessageDialog(null, new JLabel("Login failed.(Username doesn't exisited)"), "Warning", JOptionPane.INFORMATION_MESSAGE);
-								passwordField.setText("");
-								btn_Login.setEnabled(false);
-								btn_Register.setEnabled(false);
-								isResponse=true;
-								break;
-							}
-							if(string.charAt(1)=='Q')
-							{
-								JOptionPane.showMessageDialog(null, new JLabel("Login failed.(Database query error)"), "Warning", JOptionPane.INFORMATION_MESSAGE);
-								passwordField.setText("");
-								btn_Login.setEnabled(false);
-								btn_Register.setEnabled(false);
-								isResponse=true;
-								break;
-							}
-						}
-					}
-				}
-			}
-			catch (Exception E)
-			{
-				E.printStackTrace();
-			}
-		}
-	}
-	
+
 	private void createLogPad()
 	{
 		logpad=new JFrame();
+		try 
+		{
+			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		logpad.setTitle("LogPad");
 		logpad.setResizable(false);
 		logpad.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -526,54 +372,31 @@ public class Client extends JFrame
 		
 		btn_Register.addActionListener(new ActionListener()
 		{
-			byte[] bytes;
-			String string;
-			
 			@Override
 			public void actionPerformed(ActionEvent e) 
 			{
-				String tempNickName=JOptionPane.showInputDialog(null, new JLabel("Set your nickname:"), "Register", JOptionPane.INFORMATION_MESSAGE);
-				if(!tempNickName.isEmpty())
+				try
 				{
-					try
+					String nickname=JOptionPane.showInputDialog(logpad, new JLabel("Input nickname:"));
+					printWriter.println("#Register");
+					printWriter.println(textField_UserName.getText());
+					printWriter.println(nickname);
+					printWriter.println(new String(passwordField.getPassword()));
+					printWriter.flush();
+					String response=bufferedReader.readLine();
+					if(response.equals("#Register Success"))
 					{
-						inputStream=socket.getInputStream();
-						outputStream=socket.getOutputStream();
-						int len;
-						String pwd=new String(passwordField.getPassword());
-						string="@"+textField_UserName.getText()+"|"+tempNickName+"|"+pwd;
-						bytes=string.getBytes();
-						len=bytes.length;
-						outputStream.write(bytes, 0, len);
-						outputStream.flush();
-						bytes=new byte[1024];
-						boolean isResponse=false;
-						while(!isResponse)
+						JOptionPane.showMessageDialog(logpad, new JLabel("Register success"), "Notice", JOptionPane.OK_OPTION);
+					}
+					else
+						if(response.equals("#User Existed"))
 						{
-							len=inputStream.read(bytes);
-							string=new String(bytes, 0, len);
-							switch (string.charAt(0))
-							{
-								case '@'://success
-								{
-									JOptionPane.showMessageDialog(null, new JLabel("Register success."), "Notice", JOptionPane.INFORMATION_MESSAGE);
-									isResponse=true;
-									break;
-								}
-
-								case '!'://failed
-								{
-									JOptionPane.showMessageDialog(null, new JLabel("Register failed.(Account existed)"), "Warning", JOptionPane.INFORMATION_MESSAGE);
-									isResponse=true;
-									break;
-								}
-							}
+							JOptionPane.showMessageDialog(logpad, new JLabel("User existed"), "Warning", JOptionPane.WARNING_MESSAGE);
 						}
-					}
-					catch (Exception E)
-					{
-						E.printStackTrace();
-					}
+				}
+				catch (Exception E)
+				{
+					E.printStackTrace();
 				}
 			}
 		});
@@ -583,68 +406,52 @@ public class Client extends JFrame
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				new LoginThread().start();
-			}
-		});
-		
-		/*addWindowListener(new WindowAdapter()
-		{
-			@Override
-			public void windowClosing(WindowEvent e)
-			{
 				try
 				{
-					System.out.println("closing");
-					OutputStream outputStream=socket.getOutputStream();
-					outputStream.write("~".getBytes());
-					outputStream.flush();
-					
-					byte[] bytes=new byte[1024];
-					InputStream inputStream=socket.getInputStream();
-					int len=inputStream.read(bytes);
-					String string=new String(bytes, 0, len);
-					if(string.charAt(0)=='~');
+					printWriter.println("#Login");
+					printWriter.println(textField_UserName.getText());
+					printWriter.println(new String(passwordField.getPassword()));
+					printWriter.flush();
+					String response=bufferedReader.readLine();
+					if(response.equals("#Login Success"))
+					{
+						//JOptionPane.showMessageDialog(logpad, new JLabel("Login success"), "Notice", JOptionPane.PLAIN_MESSAGE);
+						userName=bufferedReader.readLine();
+						userNickName=bufferedReader.readLine();
+						
+						logpad.setVisible(false);
+						setVisible(true);
+					}
+					else
+						if(response.equals("#Login Failed"))
+						{
+							JOptionPane.showMessageDialog(logpad, new JLabel("Login failed(Error password)"), "Warning", JOptionPane.WARNING_MESSAGE);
+							passwordField.setText("");
+						}
+						else
+							if(response.equals("#User Not Existed"))
+							{
+								JOptionPane.showMessageDialog(logpad, new JLabel("Login failed(User doesn't existed)"), "Warning", JOptionPane.WARNING_MESSAGE);
+								textField_UserName.setText("");
+								passwordField.setText("");
+							}
+							else
+								if(response.equals("#User Logged"))
+								{
+									JOptionPane.showMessageDialog(logpad, new JLabel("Login failed(User is already logged)"), "Warning", JOptionPane.WARNING_MESSAGE);
+									textField_UserName.setText("");
+									passwordField.setText("");
+								}
 				}
 				catch (Exception E)
 				{
 					E.printStackTrace();
 				}
 			}
-		});*/
+		});
 		
 		logpad.setVisible(true);
 	}
-	
-	private void sendMessage(String string)
-	{
-		try
-		{
-			string="#*"+string;
-			byte[] bytes=string.getBytes();
-			outputStream2.write(bytes);
-			outputStream2.flush();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	private void sendMessage(String string,String target)
-	{
-		try
-		{
-			string="#@"+target+"|"+string;
-			byte[] bytes=string.getBytes();
-			outputStream2.write(bytes);
-			outputStream2.flush();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
 	
 	public static void main(String[] args)
 	{

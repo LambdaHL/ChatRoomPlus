@@ -17,8 +17,6 @@ public class Server extends JFrame
 	private JTextArea textArea_Conversation, textArea_Log;
 	private ArrayList<Client> clients;
 	private DBOperator dbOperator;
-	private Date date;
-	private SimpleDateFormat simpleDateFormat;
 	private ArrayList<User> userList;
 	
 	public Server()
@@ -26,14 +24,20 @@ public class Server extends JFrame
 		clients=new ArrayList<Client>();
 		userList=new ArrayList<User>();
 		dbOperator=new DBOperator();
-		date=new Date();
-		simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 		createGUI();
 		new ServerAcceptThread().start();
 	}
 	
 	private void createGUI()
 	{
+		try 
+		{
+			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		setTitle("Server");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -42,32 +46,6 @@ public class Server extends JFrame
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
-		addWindowListener(new WindowAdapter()
-		{
-			@Override
-			public void windowClosing(WindowEvent e)
-			{
-				OutputStream outputStream;
-				for(int i=0;i<clients.size();i++)
-				{
-					try 
-					{
-//						outputStream=clients.get(i).getSocket().getOutputStream();
-//						outputStream.write("~".getBytes());
-//						outputStream.flush();
-//						clients.get(i).getSocket().shutdownInput();
-//						clients.get(i).getSocket().shutdownOutput();
-//						clients.get(i).getSocket().close();
-					} 
-					catch (Exception E) 
-					{
-						E.printStackTrace();
-					}
-					
-				}
-				super.windowClosing(e);
-			}
-		});
 		
 		scrollPane_List = new JScrollPane();
 		scrollPane_List.setBounds(761, 10, 295, 489);
@@ -104,7 +82,7 @@ public class Server extends JFrame
 
 	class ServerAcceptThread extends Thread
 	{
-		private ServerSocket serverSocket,serverSocket2;
+		private ServerSocket serverSocket;
 
 		@Override
 		public void run()
@@ -112,14 +90,12 @@ public class Server extends JFrame
 			try
 			{
 				serverSocket=new ServerSocket(2018);
-				serverSocket2=new ServerSocket(2019);
 				textArea_Log.append("Server Accepting...\n");
 				while(true)
 				{
 					Socket socket=serverSocket.accept();
-					Socket socket2=serverSocket2.accept();
 					textArea_Log.append("Client("+socket.getInetAddress()+":"+socket.getPort()+") Connected\n");
-					Client client=new Client(socket,socket2);
+					Client client=new Client(socket);
 					clients.add(client);
 				}
 			}
@@ -132,81 +108,80 @@ public class Server extends JFrame
 
 	class Client extends Thread
 	{
-		private Socket socket,socket2;
-		private String userName;
-		private String userNickName;
-		private String icon;
-		private String ipString;
-		private InputStream inputStream;
-		private OutputStream outputStream;
-		private byte[] bytes;
+		private Socket socket;
+		private String userName,userNickName,icon,ipString,terminateString;
+		private PrintWriter printWriter;
+		private BufferedReader bufferedReader;
 		private String string;
 		private boolean isLogged;
-		private DBOperator dbOperator;
 		private Date date;
 		private SimpleDateFormat simpleDateFormat;
-		private int indexInUserList;
 		private boolean isLoggedout;
+		private User user;
 		
 		@Override
-		public void run()
+		public void run()//listen all
 		{
 			try
 			{
-				inputStream=socket.getInputStream();
-				outputStream=socket.getOutputStream();
-				while(isLoggedout==false)
+				while(!socket.isClosed())
 				{
-					int len;
-					if(inputStream.available()!=0)
+					while(!isLoggedout)
 					{
-						bytes=new byte[10240];
-						len=inputStream.read(bytes);
-						string=new String(bytes, 0, len);
-						switch (string.charAt(0))
-						{
-							case '@':// register
-							{
-								String temp = new String(bytes, 0, len).substring(1);
-								String[] strings = temp.split("\\|");
-								if (dbOperator.register(strings[0], strings[1],	strings[2]) == DBOperator.REG_USERNAME_SUCCESS) 
-								{
-									this.userName = strings[0];
-									this.userNickName = strings[1];
-									outputStream.write("@".getBytes());
-									outputStream.flush();
-									textArea_Log.append("UserID:" + userName + " IP:" + socket.getInetAddress() + ":" + socket.getPort() + " registered\n");
-								} 
-								else 
-								{
-									outputStream.write("!".getBytes());
-									outputStream.flush();
-									textArea_Log.append("IP:" + socket.getInetAddress() + ":" + socket.getPort() + " registered failed\n");
-								}
-								break;
-							}
+						string=bufferedReader.readLine();
 
-							case '>':// login
+						if(string.equals("#Register"))
+						{
+							String userName=bufferedReader.readLine();
+							String userNickName=bufferedReader.readLine();
+							String password=bufferedReader.readLine();
+							switch(dbOperator.register(userName, userNickName, password))
 							{
-								String temp = new String(bytes, 0, len).substring(1);
-								String[] strings =temp.split("\\|");
-								switch (dbOperator.login(strings[0], strings[1])) 
+								case DBOperator.REG_USERNAME_SUCCESS:
 								{
-									case DBOperator.LOGIN_PWD_RIGHT: 
+									this.userName=userName;
+									this.userNickName=userNickName;
+									printWriter.println("#Register Success");
+									printWriter.flush();
+									textArea_Log.append("UserID:" + userName + " IP:" + socket.getInetAddress() + ":" + socket.getPort() + " registered\n");
+									terminateString=new String("IP:" + socket.getInetAddress() + ":" + socket.getPort() + " disconnected\n");
+									break;
+								}
+
+								case DBOperator.REG_USERNAME_EXISITED:
+								{
+									printWriter.println("#User Existed");
+									printWriter.flush();
+									textArea_Log.append("IP:" + socket.getInetAddress() + ":" + socket.getPort() + " registered failed\n");
+									terminateString=new String("IP:" + socket.getInetAddress() + ":" + socket.getPort() + " disconnected\n");
+									break;
+								}
+							}
+							continue;
+						}
+
+						if(string.equals("#Login"))
+						{
+							String userName=bufferedReader.readLine();
+							String password=bufferedReader.readLine();
+							terminateString=new String("IP:" + socket.getInetAddress() + ":" + socket.getPort() + " disconnected\n");
+							if(!dbOperator.isLogged(userName))
+							{
+								switch(dbOperator.login(userName, password))
+								{
+									case DBOperator.LOGIN_PWD_RIGHT:
 									{
-										isLogged = true;
-										isLoggedout = false;
-										userName = strings[0];
-										userNickName = dbOperator.getUserNickName(userName);
-										icon = dbOperator.getUserIcon(userName);
-										outputStream.write(("^" + userName + "|" + userNickName).getBytes());
-										outputStream.flush();
+										printWriter.println("#Login Success");
+										isLogged=true;
+										isLoggedout=false;
+										this.userName=userName;
+										this.userNickName=dbOperator.getUserNickName(userName);
+										icon=dbOperator.getUserIcon(userName);
+										printWriter.println(this.userName);
+										printWriter.println(this.userNickName);
+										printWriter.flush();
 										userList.add(this.getUser());
-										indexInUserList = userList.size()-1;
-										//new ServerUpdateThread(userName).start();
-										textArea_Log.append("UserID:" + userName + " IP:" + socket.getInetAddress() + ":" + socket.getPort() + " logged in\n");
-										new MessageThread(socket, socket2).start();
-										//UpdateUserList();
+										this.user=this.getUser();
 										list_UserList.setModel(new MyListModel<Object>(userList));
 										list_UserList.setCellRenderer(new MyListCellRenderer());
 										break;
@@ -214,168 +189,77 @@ public class Server extends JFrame
 
 									case DBOperator.LOGIN_PWD_WRONG:
 									{
-										isLogged = false;
-										outputStream.write("!".getBytes());
-										outputStream.flush();
+										printWriter.println("#Login Failed");
+										printWriter.flush();
+										isLogged=false;
 										break;
 									}
-									
+
 									case DBOperator.LOGIN_USERNAME_NOT_EXISITED:
 									{
-										isLogged = false;
-										outputStream.write("!E".getBytes());
-										outputStream.flush();
+										printWriter.println("#User Not Existed");
+										printWriter.flush();
+										isLogged=false;
 										break;
 									}
-									
+
 									case DBOperator.LOGIN_SQLERROR:
 									{
-										isLogged = false;
-										outputStream.write("!Q".getBytes());
-										outputStream.flush();
+										System.out.println("Database error");
 										break;
 									}
 								}
-								break;
 							}
-
-							case '$':// icon file
+							else//user has been logged
 							{
-								String fileIconPath = System.getProperty("user.dir") + "\\Server\\Icons";
-								File fileIcon = new File(fileIconPath, new String(bytes));
-								DataOutputStream dataOutputStream;
-								byte[] tempBytes = new byte[4096];
-								int tempLen;
-								tempLen = inputStream.read(tempBytes);
-								fileIcon.delete();
-								fileIcon.createNewFile();
-								dataOutputStream = new DataOutputStream(new FileOutputStream(fileIcon));
-								dataOutputStream.write(tempBytes, 0, tempLen);
-								dataOutputStream.close();
-								this.icon = fileIcon.getName();
-								dbOperator.updateIcon(userName, icon);
-								break;
+								printWriter.println("#User Logged");
+								printWriter.flush();
 							}
+							continue;
+						}
+						
+						if(string.equals("#Logout"))
+						{
+							dbOperator.logout(userName);
+							terminateString=new String("IP:" + socket.getInetAddress() + ":" + socket.getPort() + " disconnected\n");
+							printWriter.println("#Confirmed");
+							printWriter.flush();
+							socket.shutdownInput();
+							socket.shutdownOutput();
+							isLogged=false;
+							isLoggedout=true;
+							userList.remove(getIndex(userName));
+							list_UserList.setModel(new MyListModel<Object>(userList));
+							list_UserList.setCellRenderer(new MyListCellRenderer());
+							continue;
+						}
+						
+						if(string.equals("#Message"))
+						{
+							String time=bufferedReader.readLine();
+							String message=bufferedReader.readLine();
+							textArea_Conversation.append(time+"\r\n");
+							textArea_Conversation.append(message+"\r\n");
 							
-							case '~'://client close
-							{
-								outputStream.write("~".getBytes());
-								socket.shutdownInput();
-								socket.shutdownOutput();
-								isLoggedout=true;
-								isLogged=false;
-								socket.close();
-							}
+							//Unfinished:textpane
+							
+							continue;
+						}
+						
+						if(string.equals("#MessageTo"))
+						{
+							//Unfinished:private chat
+							
+							continue;
 						}
 					}
-					if(socket.isClosed())
-					{
-						userList.remove(getIndex(userName));
-						list_UserList.setModel(new MyListModel<Object>(userList));
-						list_UserList.setCellRenderer(new MyListCellRenderer());
-						textArea_Log.append("UserID:" + userName + " " + ipString + " logged out\n" );
-					}
-					
 				}
 			}
 			catch (Exception e) 
 			{
 				e.printStackTrace();
 			}
-		}
-		
-		private void UpdateUserList()
-		{
-			int k;
-			try
-			{
-				//Update Server User List
-				list_UserList.setModel(new MyListModel<Object>(userList));
-				list_UserList.setCellRenderer(new MyListCellRenderer());
-				if(userList.size()>0)
-				{
-					//Update Client User List
-					for(k=0;k<userList.size();k++)//get the current location
-					{
-						if(userList.get(k).name.equals(userName))
-						{
-							break;
-						}
-					}
-					for(int i=0;i<userList.size();i++)//Traversal userlist
-					{
-						/*//send current user info
-						if(i==k && i!=0)//skip when traversal to current user*******************************
-						{
-							System.out.println("i:"+i);
-							System.out.println("k:"+k);
-							continue;
-						}*/
-						String onlineListString="&"+userList.get(k).nickName + "|" + userList.size();
-						//i always begin at 0
-						
-						System.out.println("onlineListString:"+onlineListString);
-						byte[] bytes=onlineListString.getBytes();
-						outputStream=userList.get(k).socket.getOutputStream();
-						outputStream.write(bytes, 0, bytes.length);
-						outputStream.flush();
-						System.out.println("onlineListString send");
-						
-						/*//wait for a response that client had received previous data
-						inputStream=userList.get(k).socket.getInputStream();
-						int len=inputStream.read(bytes);//read the char "+" that client has return
-						
-						String temp=new String(bytes, 0, len);
-						System.out.println("temp:"+temp);
-						DataOutputStream dataOutputStream=new DataOutputStream(outputStream);
-						File iconFile=new File(userList.get(k).icon);
-						DataInputStream dataInputStream=new DataInputStream(new FileInputStream(iconFile));
-						if(temp.charAt(0)=='+')//client's response confirmed
-						{
-							System.out.println("+ recieved");
-							bytes=new byte[10240];
-							len=dataInputStream.read(bytes);
-							outputStream.write(bytes, 0, len);//send itself file
-							outputStream.flush();
-						}//file sent
-						*/
-						//send all user info
-						System.out.println("userList.size:"+userList.size());
-						for(int j=0;j<userList.size();j++)
-						{
-							System.out.println("Entered No."+ j +" circulation");
-							String temp=userList.get(j).name + "|" + userList.get(j).nickName;
-							outputStream.write(temp.getBytes());
-							outputStream.flush();
-														
-							bytes=new byte[1024];
-							System.out.println("current username:"+userName);
-							System.out.println("available:"+inputStream.available());
-							while(inputStream.available()==0) {}
-							int len=inputStream.read(bytes);	//block
-							temp=new String(bytes, 0 ,len);
-							System.out.println("temp:"+temp);
-							if((new String(bytes, 0, len)).charAt(0)=='&')
-							{							
-								//send icon
-								DataOutputStream dataOutputStream=new DataOutputStream(outputStream);
-								File iconFile=new File(userList.get(i).icon);
-								DataInputStream dataInputStream=new DataInputStream(new FileInputStream(iconFile));
-								
-								len=0;
-								len=dataInputStream.read(bytes);
-								dataOutputStream.write(bytes, 0, len);
-								dataOutputStream.flush();
-							}
-						}
-						System.out.println("circulation end\n");
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
+			textArea_Log.append(terminateString);
 		}
 		
 		private int getIndex(String name)
@@ -388,16 +272,21 @@ public class Server extends JFrame
 			return 0;
 		}
 		
-		public Client(Socket socket,Socket socket2)
+		public Client(Socket socket)
 		{
 			this.socket=socket;
-			this.socket2=socket2;
-			dbOperator=new DBOperator();
-			date=new Date();
-			simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 			isLogged=false;
 			isLoggedout=false;
 			ipString="IP:" + socket.getInetAddress() + ":" + socket.getPort();
+			try
+			{
+				printWriter=new PrintWriter(socket.getOutputStream());
+				bufferedReader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
 			this.start();
 		}
 
@@ -431,70 +320,16 @@ public class Server extends JFrame
 			User user=new User(userName, userNickName, icon, socket.getInetAddress().toString()+":"+socket.getPort(), socket);
 			return user;
 		}
-	}
-	
-	class MessageThread extends Thread
-	{
-		private Socket socket,socket2;
-		private InputStream inputstream;
-		private OutputStream outputStream;
-		private byte[] bytes=new byte[1024];
-		private String string;
-		private String[] strings;
-		private boolean isConversationEnd;
 		
-		@Override
-		public void run()
+		private void updateUserList(User currentUser)
 		{
+			//Unfinished^
 			try
 			{
-				while(isConversationEnd==false)
+				for(int i=0;i<userList.size();i++)
 				{
-					if(inputstream.available()!=0) 
-					{
-						int len=inputstream.read(bytes);
-						string=new String(bytes, 0, len);
-						if(string.charAt(0)=='#')
-						{
-							string=string.substring(1);
-							switch (string.charAt(0))
-							{
-								case '*'://to all
-								{
-									string=string.substring(1);
-									for(int i=0;i<userList.size();i++)//traversal all users
-									{
-										
-									}
-									
-								}
-								
-								case '@'://to someone
-								{
-									string=string.substring(1);
-									strings=string.split("\\|");
-									
-								}
-							}
-						}
-					}
+					
 				}
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
-		
-		public MessageThread(Socket socket,Socket socket2)
-		{
-			this.socket=socket;
-			this.socket2=socket2;
-			isConversationEnd=false;
-			try
-			{
-				inputstream=socket2.getInputStream();
-				outputStream=socket2.getOutputStream();
 			}
 			catch (Exception e)
 			{
