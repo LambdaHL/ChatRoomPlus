@@ -1,0 +1,289 @@
+package server;
+
+import java.sql.*;
+import java.util.ArrayList;
+
+public class DBOperator 
+{
+    private static final String JDBC_DRIVER="com.mysql.cj.jdbc.Driver";
+	private static final String DB_URL="jdbc:mysql://localhost:3306/UserDB?useSSL=false&serverTimezone=UTC";
+	private static final String USER="root";
+    private static final String PASSWORD="123456";
+    private Connection connection;
+    private PreparedStatement preparedStatement;
+    public static final int LOGIN_PWD_RIGHT=0;
+    public static final int LOGIN_PWD_WRONG=1;
+    public static final int LOGIN_USERNAME_EXISITED=2;
+    public static final int LOGIN_USERNAME_NOT_EXISITED=4;
+    public static final int LOGIN_SQLERROR=3;
+    public static final int REG_USERNAME_SUCCESS=0;
+    public static final int REG_USERNAME_EXISITED=1;
+    public static final int UPDATE_PWD_SUCCESS=0;
+    public static final int UPDATE_PWD_OPWD_ERROR=1;
+    public static final int UPDATE_PWD_SQLERROR=2;
+
+    public DBOperator()
+    {
+        try
+        {
+            Class.forName(JDBC_DRIVER);
+            connection=DriverManager.getConnection(DB_URL, USER, PASSWORD);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public int register(String userName, String userNickName, String password)
+    {
+        try
+        {
+            String sql="INSERT INTO User(username,usernickname,password,icon) VALUES(?,?,?,?)";
+            preparedStatement=connection.prepareStatement(sql);
+            preparedStatement.setString(1, userName);
+            preparedStatement.setString(2, userNickName);
+            preparedStatement.setString(3, password);
+            preparedStatement.setString(4, System.getProperty("user.dir")+"\\Server\\Icons\\usericon.png");
+            System.out.println(preparedStatement.toString());
+            preparedStatement.executeUpdate();
+            return REG_USERNAME_SUCCESS;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return REG_USERNAME_EXISITED;
+        }
+    }
+
+    public int login(String userName, String password)
+    {
+        try
+        {
+            String sql="SELECT username FROM User";
+            preparedStatement=connection.prepareStatement(sql);
+            preparedStatement.executeQuery();
+            ResultSet resultSet=preparedStatement.getResultSet();
+            ArrayList<String> userNameList=new ArrayList<String>();
+            while(resultSet.next())
+            {
+                userNameList.add(resultSet.getString(1));
+            }
+            if(userNameList.contains(userName))
+            {
+                sql="SELECT password FROM User WHERE username=?";
+                preparedStatement=connection.prepareStatement(sql);
+                preparedStatement.setString(1, userName);
+                System.out.println(preparedStatement.toString());
+                preparedStatement.executeQuery();
+                resultSet=preparedStatement.getResultSet();
+                resultSet.next();
+                String currentPassword=resultSet.getString(1);
+                if(password.equals(currentPassword))
+                    return LOGIN_PWD_RIGHT;
+                else
+                    return LOGIN_PWD_WRONG;
+            }
+            else
+            {
+                return LOGIN_USERNAME_NOT_EXISITED;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return LOGIN_SQLERROR;
+        }
+    }
+
+    public void updateIcon(String userName, String icon)
+    {
+        try
+        {
+            String sql="UPDATE User SET icon=? WHERE username=?";
+            preparedStatement=connection.prepareStatement(sql);
+            preparedStatement.setString(1, icon);
+            preparedStatement.setString(2, userName);
+            preparedStatement.executeUpdate();
+            System.out.println(preparedStatement.toString());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean updateNickName(String userName, String nickName)
+    {
+        try
+        {
+            String sql="UPDATE User SET usernickname=? WHERE username=?";
+            preparedStatement=connection.prepareStatement(sql);
+            preparedStatement.setString(1, nickName);
+            preparedStatement.setString(2, userName);
+            preparedStatement.executeUpdate();
+            System.out.println(preparedStatement.toString());
+            return true;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public int updatePassword(String userName, String originalPassword, String newPassword)
+    {
+        try
+        {
+            String sql="SELECT password FROM User WHERE username=?";
+            preparedStatement=connection.prepareStatement(sql);
+            preparedStatement.setString(1, userName);
+            preparedStatement.executeQuery();
+            ResultSet resultSet=preparedStatement.getResultSet();
+            if(resultSet.getString(1).equals(originalPassword))
+            {
+                sql="UPDATE User SET password=? WHERE username=?";
+                preparedStatement=connection.prepareStatement(sql);
+                preparedStatement.setString(1, newPassword);
+                preparedStatement.setString(2, userName);
+                preparedStatement.executeQuery();
+                System.out.println(preparedStatement.toString());
+                return UPDATE_PWD_SUCCESS;
+            }
+            else
+            {
+                return UPDATE_PWD_OPWD_ERROR;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return UPDATE_PWD_SQLERROR;
+        }
+    }
+
+    public ResultSet getAllUserList()
+    {
+        try
+        {
+            String sql="SELECT * FROM User";
+            preparedStatement=connection.prepareStatement(sql);
+            preparedStatement.executeQuery();
+            return preparedStatement.getResultSet();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public ArrayList<String> getUserName()
+    {
+        try
+        {
+            String sql="SELECT username FROM User";
+            preparedStatement=connection.prepareStatement(sql);
+            preparedStatement.executeQuery();
+            ResultSet resultSet=preparedStatement.getResultSet();
+            ArrayList<String> userList=new ArrayList<String>();
+            while(resultSet.next())
+            {
+                userList.add(resultSet.getString(1));
+            }
+            return userList;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public ArrayList<String> getUserIcon()
+    {
+        try
+        {
+            String sql="SELECT icon FROM User";
+            preparedStatement=connection.prepareStatement(sql);
+            preparedStatement.executeQuery();
+            ResultSet resultSet=preparedStatement.getResultSet();
+            ArrayList<String> iconList=new ArrayList<String>();
+            while(resultSet.next())
+            {
+                iconList.add(resultSet.getString(1));
+            }
+            return iconList;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public ArrayList<String> getUserNickName()
+    {
+        try
+        {
+            String sql="SELECT usernickname FROM User";
+            preparedStatement=connection.prepareStatement(sql);
+            preparedStatement.executeQuery();
+            ResultSet resultSet=preparedStatement.getResultSet();
+            ArrayList<String> nickNameList=new ArrayList<String>();
+            resultSet.next();
+            nickNameList.add(resultSet.getString(1));
+            return nickNameList;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public String getUserNickName(String userName)
+    {
+    	try
+        {
+            String sql="SELECT usernickname FROM User WHERE username=?";
+            preparedStatement=connection.prepareStatement(sql);
+            preparedStatement.setString(1, userName);
+            preparedStatement.executeQuery();
+            ResultSet resultSet=preparedStatement.getResultSet();
+            String result=new String();
+            resultSet.next();
+            result=resultSet.getString(1);
+            return result;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    public String getUserIcon(String userName)
+    {
+    	try
+    	{
+    		String sql="SELECT icon FROM User WHERE username=?";
+    		preparedStatement=connection.prepareStatement(sql);
+    		preparedStatement.setString(1, userName);
+    		preparedStatement.executeQuery();
+    		ResultSet resultSet=preparedStatement.getResultSet();
+    		String result=new String();
+    		resultSet.next();
+    		result=resultSet.getString(1);
+    		return result;
+    	}
+    	catch (Exception e)
+    	{
+    		e.printStackTrace();
+    		return null;
+    	}
+    }
+    
+    
+}
