@@ -120,16 +120,16 @@ public class Server extends JFrame
 		private User user;
 		
 		@Override
-		public void run()//listen all
+		public void run()//individual listen
 		{
 			try
 			{
 				while(!socket.isClosed())
 				{
-					while(!isLoggedout)
+					System.out.println(this.userName);
+					if(!isLoggedout)
 					{
 						string=bufferedReader.readLine();
-
 						if(string.equals("#Register"))
 						{
 							String userName=bufferedReader.readLine();
@@ -182,8 +182,7 @@ public class Server extends JFrame
 										printWriter.flush();
 										userList.add(this.getUser());
 										this.user=this.getUser();
-										list_UserList.setModel(new MyListModel<Object>(userList));
-										list_UserList.setCellRenderer(new MyListCellRenderer());
+										updateUserList(this.user);
 										break;
 									}
 
@@ -229,18 +228,19 @@ public class Server extends JFrame
 							isLogged=false;
 							isLoggedout=true;
 							userList.remove(getIndex(userName));
-							list_UserList.setModel(new MyListModel<Object>(userList));
-							list_UserList.setCellRenderer(new MyListCellRenderer());
+							updateUserList(this.user);
 							continue;
 						}
 						
 						if(string.equals("#Message"))
 						{
 							String time=bufferedReader.readLine();
+							String source=bufferedReader.readLine();
 							String message=bufferedReader.readLine();
 							textArea_Conversation.append(time+"\r\n");
+							textArea_Conversation.append(source+"\r\n");
 							textArea_Conversation.append(message+"\r\n");
-							
+							sendToAll(time, source, message);
 							//Unfinished:textpane
 							
 							continue;
@@ -248,6 +248,11 @@ public class Server extends JFrame
 						
 						if(string.equals("#MessageTo"))
 						{
+							String time=bufferedReader.readLine();
+							String source=bufferedReader.readLine();
+							String target=bufferedReader.readLine();
+							String message=bufferedReader.readLine();
+							sendTo(time, source, target, message);
 							//Unfinished:private chat
 							
 							continue;
@@ -323,12 +328,84 @@ public class Server extends JFrame
 		
 		private void updateUserList(User currentUser)
 		{
-			//Unfinished^
+			try
+			{
+				sleep(1000);
+				list_UserList.setModel(new MyListModel<Object>(userList));
+				list_UserList.setCellRenderer(new MyListCellRenderer());
+				for(int i=0;i<userList.size();i++)
+				{
+					System.out.println("currentUser:"+currentUser.name);
+					System.out.println("client:"+userName);
+					if(/*userList.get(i).equals(currentUser) || */user.equals(currentUser))
+					{
+						continue;
+					}
+					else
+					{
+						printWriter.println("#Update List");
+						printWriter.println(userList.get(i).name);
+						printWriter.println(userList.get(i).nickName);
+						String iconPath=userList.get(i).icon;
+						File iconFile=new File(iconPath);
+						printWriter.println(iconFile.getName());
+						printWriter.flush();
+						DataInputStream dataInputStream=new DataInputStream(new FileInputStream(iconFile));
+						System.out.println("dataInputStream established");
+						DataOutputStream dataOutputStrem=new DataOutputStream(socket.getOutputStream());
+						System.out.println("dataOutputStream established");
+						byte[] bytes=new byte[2048];
+						int length=dataInputStream.read(bytes);
+						dataOutputStrem.write(bytes, 0, length);
+						dataOutputStrem.flush();
+						System.out.println("transmit complete");
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		private void sendToAll(String time,String source,String message)
+		{
 			try
 			{
 				for(int i=0;i<userList.size();i++)
 				{
-					
+					Socket socket=userList.get(i).socket;
+					PrintWriter pWriter=new PrintWriter(socket.getOutputStream());
+					pWriter.println("#Message");
+					pWriter.println(time);
+					pWriter.println(source);
+					pWriter.println(message);
+					pWriter.flush();
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		private void sendTo(String time,String source,String target,String message)
+		{
+			try
+			{
+				for(int i=0;i<userList.size();i++)
+				{
+					if(userList.get(i).name.equals(target))
+					{
+						Socket socket=userList.get(i).socket;
+						PrintWriter pWriter=new PrintWriter(socket.getOutputStream());
+						pWriter.println("#Message From");
+						pWriter.println(time);
+						pWriter.println(source);
+						pWriter.println(message);
+						pWriter.flush();
+						break;
+					}
 				}
 			}
 			catch (Exception e)

@@ -44,7 +44,6 @@ public class DBOperator
             preparedStatement.setString(2, userNickName);
             preparedStatement.setString(3, password);
             preparedStatement.setString(4, System.getProperty("user.dir")+"\\Server\\Icons\\usericon.png");
-            System.out.println(preparedStatement.toString());
             preparedStatement.executeUpdate();
             return REG_USERNAME_SUCCESS;
         }
@@ -73,7 +72,6 @@ public class DBOperator
                 sql="SELECT password FROM User WHERE username=?";
                 preparedStatement=connection.prepareStatement(sql);
                 preparedStatement.setString(1, userName);
-                System.out.println(preparedStatement.toString());
                 preparedStatement.executeQuery();
                 resultSet=preparedStatement.getResultSet();
                 resultSet.next();
@@ -125,7 +123,6 @@ public class DBOperator
             preparedStatement.setString(1, icon);
             preparedStatement.setString(2, userName);
             preparedStatement.executeUpdate();
-            System.out.println(preparedStatement.toString());
         }
         catch (Exception e)
         {
@@ -142,7 +139,6 @@ public class DBOperator
             preparedStatement.setString(1, nickName);
             preparedStatement.setString(2, userName);
             preparedStatement.executeUpdate();
-            System.out.println(preparedStatement.toString());
             return true;
         }
         catch (Exception e)
@@ -168,7 +164,6 @@ public class DBOperator
                 preparedStatement.setString(1, newPassword);
                 preparedStatement.setString(2, userName);
                 preparedStatement.executeQuery();
-                System.out.println(preparedStatement.toString());
                 return UPDATE_PWD_SUCCESS;
             }
             else

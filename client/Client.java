@@ -65,15 +65,61 @@ public class Client extends JFrame
 	
 	class ListenThread extends Thread
 	{
-		String string;
-		int len;
-		
 		@Override
 		public void run()
 		{
+			String string;
 			try
 			{
-				
+				while(!socket.isClosed())
+				{
+					string=bufferedReader.readLine();
+					if(string.equals("#Update List"))
+					{
+						String name=bufferedReader.readLine();
+						String nickName=bufferedReader.readLine();
+						String fileName=bufferedReader.readLine();
+						byte[] bytes=new byte[2048];
+						DataInputStream dataInputStream=new DataInputStream(socket.getInputStream());
+						File iconDir=new File(System.getProperty("user.dir")+"\\client\\"+userName+"\\"+name);
+						if(!iconDir.exists())
+							iconDir.mkdirs();
+						File iconFile=new File(iconDir, fileName);
+						if(!iconFile.exists())
+							iconFile.createNewFile();
+						DataOutputStream dataOutputStream=new DataOutputStream(new FileOutputStream(iconFile));
+						int length=dataInputStream.read(bytes);
+						dataOutputStream.write(bytes, 0, length);
+						User user=new User(name, nickName, iconFile.getAbsolutePath(), null, null);
+						userList.add(user);
+						list_UserList.setModel(new MyListModel<Object>(userList));
+						list_UserList.setCellRenderer(new MyListCellRenderer());
+						socket.getInputStream().skip(2048);
+						continue;
+					}
+
+					if(string.equals("#Message"))//received group message
+					{
+						String time=bufferedReader.readLine();
+						String source=bufferedReader.readLine();
+						String message=bufferedReader.readLine();
+						
+						//Unfinished:textpane
+
+						continue;
+					}
+
+					if(string.equals("#Message From"))//received private message
+					{
+						String time=bufferedReader.readLine();
+						String source=bufferedReader.readLine();
+						String message=bufferedReader.readLine();
+
+						//Unfinished:new private chat frame
+						
+						continue;
+					}
+				}
 			}
 			catch (Exception e)
 			{
@@ -193,7 +239,6 @@ public class Client extends JFrame
 			{
 				try
 				{
-					System.out.println("closing");
 					printWriter.println("#Logout");
 					printWriter.flush();
 					String str=bufferedReader.readLine();
@@ -222,7 +267,13 @@ public class Client extends JFrame
 				SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 				String time=simpleDateFormat.format(new Date());
 				printWriter.println(time);
-				String message=" @"+userName+" "+editorPane.getText();
+				String source=userName;
+				printWriter.println(source);
+				String message=editorPane.getText();
+				//#Message
+				//1980-1-1 00:00:00
+				//Aris
+				//HelloWorld
 				printWriter.println(message);
 				printWriter.flush();
 				
@@ -415,12 +466,11 @@ public class Client extends JFrame
 					String response=bufferedReader.readLine();
 					if(response.equals("#Login Success"))
 					{
-						//JOptionPane.showMessageDialog(logpad, new JLabel("Login success"), "Notice", JOptionPane.PLAIN_MESSAGE);
 						userName=bufferedReader.readLine();
 						userNickName=bufferedReader.readLine();
-						
 						logpad.setVisible(false);
 						setVisible(true);
+						new ListenThread().start();
 					}
 					else
 						if(response.equals("#Login Failed"))
