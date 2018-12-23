@@ -236,6 +236,7 @@ public class Server extends JFrame
 							printWriter.flush();
 							socket.shutdownInput();
 							socket.shutdownOutput();
+							socket.close();
 							isLogged=false;
 							isLoggedout=true;
 							userList.remove(getIndex(userName));
