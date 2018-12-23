@@ -21,6 +21,7 @@ public class Server extends JFrame
 	
 	public Server()
 	{
+		new DBOperator().reset();
 		clients=new ArrayList<Client>();
 		userList=new ArrayList<User>();
 		dbOperator=new DBOperator();
@@ -76,6 +77,16 @@ public class Server extends JFrame
 		textArea_Log = new JTextArea();
 		textArea_Log.setEditable(false);
 		scrollPane_TextAreaLog.setViewportView(textArea_Log);
+		
+		addWindowListener(new WindowAdapter()
+		{
+			@Override
+			public void windowClosing(WindowEvent e) 
+			{
+				dbOperator.reset();
+				super.windowClosing(e);
+			}
+		});
 		
 		setVisible(true);
 	}
@@ -182,7 +193,7 @@ public class Server extends JFrame
 										printWriter.flush();
 										userList.add(this.getUser());
 										this.user=this.getUser();
-										updateUserList(this.user);
+										updateUserList();
 										break;
 									}
 
@@ -228,7 +239,7 @@ public class Server extends JFrame
 							isLogged=false;
 							isLoggedout=true;
 							userList.remove(getIndex(userName));
-							updateUserList(this.user);
+							updateUserList();
 							continue;
 						}
 						
@@ -326,18 +337,17 @@ public class Server extends JFrame
 			return user;
 		}
 		
-		private void updateUserList(User currentUser)
+		private void updateUserList()
 		{
 			try
 			{
-				sleep(1000);
+				sleep(500);
 				list_UserList.setModel(new MyListModel<Object>(userList));
 				list_UserList.setCellRenderer(new MyListCellRenderer());
 				for(int i=0;i<userList.size();i++)
 				{
-					System.out.println("currentUser:"+currentUser.name);
-					System.out.println("client:"+userName);
-					if(/*userList.get(i).equals(currentUser) || */user.equals(currentUser))
+					System.out.println("currentUser:"+user.name);
+					if(userList.get(i).equals(user))
 					{
 						continue;
 					}

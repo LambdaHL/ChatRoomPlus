@@ -1,5 +1,6 @@
 package client;
 
+import java.awt.Color;
 import java.awt.Component;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -15,6 +16,26 @@ public class MyListCellRenderer extends JLabel implements ListCellRenderer<Objec
 		setText("<html>"+user.name+"<br/>"+user.nickName+"<html/>");
 		setIcon(new ImageIcon(user.image));
 		setIconTextGap(30);
+		Color bg,fg;
+		JList.DropLocation dropLocation = list.getDropLocation();
+		if (dropLocation != null && !dropLocation.isInsert() && dropLocation.getIndex() == index) 
+		{
+			bg = Color.WHITE;
+			fg = Color.CYAN;
+		}
+		else 
+			if (isSelected) 
+			{
+				bg = Color.WHITE;
+				fg = Color.BLUE;
+			} 
+			else 
+			{
+				bg = Color.WHITE;
+				fg = Color.BLACK;
+			}
+		setBackground(bg);
+		setForeground(fg);
 		return this;
 	}
 }

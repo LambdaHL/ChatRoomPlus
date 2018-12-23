@@ -319,5 +319,18 @@ public class DBOperator
     	}
     	return false;
     }
-
+    
+    public void reset()
+    {
+    	try
+    	{
+    		String sql="UPDATE User SET logstatus=0";
+    		preparedStatement=connection.prepareStatement(sql);
+    		preparedStatement.executeUpdate();
+    	}
+    	catch (Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    }
 }
