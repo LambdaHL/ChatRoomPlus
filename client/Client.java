@@ -26,7 +26,6 @@ public class Client extends JFrame
 	private JButton btn_Enter;
 	private JFrame logpad;
 	private String userName,userNickName;
-	private ArrayList<User> userList=new ArrayList<User>();
 	private PrintWriter printWriter;
 	private BufferedReader bufferedReader;
 	
@@ -73,51 +72,64 @@ public class Client extends JFrame
 			{
 				while(!socket.isClosed())
 				{
+					System.out.println("before block");
 					string=bufferedReader.readLine();
-					if(string.equals("#Update List"))
+					System.out.println(string);
+					if(string!=null)
 					{
-						String name=bufferedReader.readLine();
-						String nickName=bufferedReader.readLine();
-						String fileName=bufferedReader.readLine();
-						byte[] bytes=new byte[2048];
-						DataInputStream dataInputStream=new DataInputStream(socket.getInputStream());
-						File iconDir=new File(System.getProperty("user.dir")+"\\client\\"+userName+"\\"+name);
-						if(!iconDir.exists())
-							iconDir.mkdirs();
-						File iconFile=new File(iconDir, fileName);
-						if(!iconFile.exists())
-							iconFile.createNewFile();
-						DataOutputStream dataOutputStream=new DataOutputStream(new FileOutputStream(iconFile));
-						int length=dataInputStream.read(bytes);
-						dataOutputStream.write(bytes, 0, length);
-						User user=new User(name, nickName, iconFile.getAbsolutePath(), null, null);
-						userList.add(user);
-						list_UserList.setModel(new MyListModel<Object>(userList));
-						list_UserList.setCellRenderer(new MyListCellRenderer());
-						socket.getInputStream().skip(2048);
-						continue;
-					}
+						if(string.equals("#Update List"))
+						{
+							int size=Integer.parseInt(bufferedReader.readLine());
+							System.out.println("size:"+size);
+							ArrayList<User> userList=new ArrayList<User>();
+							for(int i=0;i<size;i++)
+							{
+								System.out.println("i:"+i);
+								String name=bufferedReader.readLine();
+								String nickName=bufferedReader.readLine();
+								String fileName=bufferedReader.readLine();
+								byte[] bytes=new byte[2048];
+								DataInputStream dataInputStream=new DataInputStream(socket.getInputStream());
+								File iconDir=new File(System.getProperty("user.dir")+"\\client\\"+userName+"\\"+name);
+								if(!iconDir.exists())
+									iconDir.mkdirs();
+								File iconFile=new File(iconDir, fileName);
+								if(!iconFile.exists())
+									iconFile.createNewFile();
+								DataOutputStream dataOutputStream=new DataOutputStream(new FileOutputStream(iconFile));
+								int length=dataInputStream.read(bytes);
+								dataOutputStream.write(bytes, 0, length);
+								User user=new User(name, nickName, iconFile.getAbsolutePath(), null, null);
+								System.out.println(user.name+" "+user.nickName+" "+user.icon);
+								userList.add(user);
+							}
+							list_UserList.setModel(new MyListModel<Object>(userList));
+							list_UserList.setCellRenderer(new MyListCellRenderer());
+							System.out.println("list updated");
+							continue;
+						}
 
-					if(string.equals("#Message"))//received group message
-					{
-						String time=bufferedReader.readLine();
-						String source=bufferedReader.readLine();
-						String message=bufferedReader.readLine();
-						
-						//Unfinished:textpane
+						if(string.equals("#Message"))//received group message
+						{
+							String time=bufferedReader.readLine();
+							String source=bufferedReader.readLine();
+							String message=bufferedReader.readLine();
 
-						continue;
-					}
+							//Unfinished:textpane
 
-					if(string.equals("#Message From"))//received private message
-					{
-						String time=bufferedReader.readLine();
-						String source=bufferedReader.readLine();
-						String message=bufferedReader.readLine();
+							continue;
+						}
 
-						//Unfinished:new private chat frame
-						
-						continue;
+						if(string.equals("#Message From"))//received private message
+						{
+							String time=bufferedReader.readLine();
+							String source=bufferedReader.readLine();
+							String message=bufferedReader.readLine();
+
+							//Unfinished:new private chat frame
+
+							continue;
+						}
 					}
 				}
 			}
@@ -241,14 +253,10 @@ public class Client extends JFrame
 				{
 					printWriter.println("#Logout");
 					printWriter.flush();
-					String str=bufferedReader.readLine();
-					if(str.equals("#Confirmed"))
-					{
-						socket.shutdownInput();
-						socket.shutdownOutput();
-						socket.close();
-						//super.windowClosing(e);
-					}
+					socket.shutdownInput();
+					socket.shutdownOutput();
+					socket.close();
+					//super.windowClosing(e);
 				}
 				catch (Exception E)
 				{
@@ -429,6 +437,8 @@ public class Client extends JFrame
 				try
 				{
 					String nickname=JOptionPane.showInputDialog(logpad, new JLabel("Input nickname:"));
+					if(nickname==null)
+						return;
 					printWriter.println("#Register");
 					printWriter.println(textField_UserName.getText());
 					printWriter.println(nickname);
@@ -437,7 +447,7 @@ public class Client extends JFrame
 					String response=bufferedReader.readLine();
 					if(response.equals("#Register Success"))
 					{
-						JOptionPane.showMessageDialog(logpad, new JLabel("Register success"), "Notice", JOptionPane.OK_OPTION);
+						JOptionPane.showMessageDialog(logpad, new JLabel("Register success"), "Notice", JOptionPane.PLAIN_MESSAGE);
 					}
 					else
 						if(response.equals("#User Existed"))
@@ -470,6 +480,7 @@ public class Client extends JFrame
 						userNickName=bufferedReader.readLine();
 						logpad.setVisible(false);
 						setVisible(true);
+						setTitle("CharRoomPlus -"+userName);
 						new ListenThread().start();
 					}
 					else
@@ -492,6 +503,7 @@ public class Client extends JFrame
 									textField_UserName.setText("");
 									passwordField.setText("");
 								}
+					System.out.println("available:"+socket.getInputStream().available());
 				}
 				catch (Exception E)
 				{
