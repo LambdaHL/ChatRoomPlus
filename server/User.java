@@ -23,7 +23,8 @@ public class User
 		this.socket=socket;
 		try
 		{
-			imageIcon=new ImageIcon(icon);
+			String iconPath=System.getProperty("user.dir")+"\\server\\Icons\\"+icon+".png";
+			imageIcon=new ImageIcon(iconPath);
 			image=imageIcon.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT);
 		}
 		catch (Exception e)
@@ -31,6 +32,4 @@ public class User
 			e.printStackTrace();
 		}
 	}
-	
-	
 }

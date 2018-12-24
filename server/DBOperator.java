@@ -43,7 +43,7 @@ public class DBOperator
             preparedStatement.setString(1, userName);
             preparedStatement.setString(2, userNickName);
             preparedStatement.setString(3, password);
-            preparedStatement.setString(4, System.getProperty("user.dir")+"\\Server\\Icons\\usericon.png");
+            preparedStatement.setString(4, "0");
             preparedStatement.executeUpdate();
             return REG_USERNAME_SUCCESS;
         }

@@ -39,6 +39,7 @@ public class Server extends JFrame
 		{
 			e.printStackTrace();
 		}
+		
 		setTitle("Server");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -139,6 +140,7 @@ public class Server extends JFrame
 				{
 					if(!isLoggedout)
 					{
+						while(!bufferedReader.ready()) {sleep(500);}
 						string=bufferedReader.readLine();
 						if(string.equals("#Register"))
 						{
@@ -232,6 +234,8 @@ public class Server extends JFrame
 						{
 							dbOperator.logout(userName);
 							terminateString=new String("IP:" + socket.getInetAddress() + ":" + socket.getPort() + " disconnected\n");
+							printWriter.println("#Confirm");
+							printWriter.flush();
 							socket.shutdownInput();
 							socket.shutdownOutput();
 							socket.close();
@@ -336,7 +340,7 @@ public class Server extends JFrame
 			return user;
 		}
 		
-		private void updateUserList()
+		private synchronized void updateUserList()
 		{
 			PrintWriter pWriter;
 			BufferedReader bReader;
@@ -345,42 +349,24 @@ public class Server extends JFrame
 				sleep(10);
 				list_UserList.setModel(new MyListModel<Object>(userList));
 				list_UserList.setCellRenderer(new MyListCellRenderer());
-//				Traversal all user and get the socket of them
-//				Then traversal user list and send information to current socket
-				System.out.println("\ncurrent client:"+userName);
 				for(int j=0;j<userList.size();j++)
 				{
-					System.out.println("j:"+j+"  user:"+userList.get(j).name);
 					if(userList.get(j).socket.isClosed())
 						continue;
 					pWriter=new PrintWriter(userList.get(j).socket.getOutputStream());
 					bReader=new BufferedReader(new InputStreamReader(userList.get(j).socket.getInputStream()));
+					pWriter.println("#Update List");
+					pWriter.println(userList.size()-1);
 					for(int i=0;i<userList.size();i++)
 					{
-						System.out.println("	i:"+i+"  user:"+userList.get(i).name);
 						if(userList.get(i).name.equals(userList.get(j).name))
-						{
-							System.out.println("	continued");
 							continue;
-						}
-						pWriter.println("#Update List");
-						pWriter.println(userList.size()-1);
 						pWriter.println(userList.get(i).name);
 						pWriter.println(userList.get(i).nickName);
-						String iconPath=userList.get(i).icon;
-						File iconFile=new File(iconPath);
-						pWriter.println(iconFile.getName());
+						pWriter.println(userList.get(i).icon);
 						pWriter.flush();
-						DataInputStream dataInputStream=new DataInputStream(new FileInputStream(iconFile));
-						DataOutputStream dataOutputStrem=new DataOutputStream(userList.get(i).socket.getOutputStream());
-						byte[] bytes=new byte[2048];
-						int length=dataInputStream.read(bytes);
-						dataOutputStrem.write(bytes, 0, length);
-						dataOutputStrem.flush();
-						System.out.println();
 					}
 				}
-				System.out.println("Update complete====================");
 			}
 			catch (Exception e)
 			{

@@ -68,74 +68,61 @@ public class Client extends JFrame
 		public void run()
 		{
 			String string;
-			try
+			synchronized (this)
 			{
-				while(!socket.isClosed())
+				try
 				{
-					System.out.println("before block");
-					string=bufferedReader.readLine();
-					System.out.println(string);
-					if(string!=null)
+					while(!socket.isClosed())
 					{
-						if(string.equals("#Update List"))
+						while(!bufferedReader.ready()) {sleep(500);}
+						string=bufferedReader.readLine();
+						if(string!=null)
 						{
-							int size=Integer.parseInt(bufferedReader.readLine());
-							System.out.println("size:"+size);
-							ArrayList<User> userList=new ArrayList<User>();
-							for(int i=0;i<size;i++)
+							if(string.equals("#Update List"))
 							{
-								System.out.println("i:"+i);
-								String name=bufferedReader.readLine();
-								String nickName=bufferedReader.readLine();
-								String fileName=bufferedReader.readLine();
-								byte[] bytes=new byte[2048];
-								DataInputStream dataInputStream=new DataInputStream(socket.getInputStream());
-								File iconDir=new File(System.getProperty("user.dir")+"\\client\\"+userName+"\\"+name);
-								if(!iconDir.exists())
-									iconDir.mkdirs();
-								File iconFile=new File(iconDir, fileName);
-								if(!iconFile.exists())
-									iconFile.createNewFile();
-								DataOutputStream dataOutputStream=new DataOutputStream(new FileOutputStream(iconFile));
-								int length=dataInputStream.read(bytes);
-								dataOutputStream.write(bytes, 0, length);
-								User user=new User(name, nickName, iconFile.getAbsolutePath(), null, null);
-								System.out.println(user.name+" "+user.nickName+" "+user.icon);
-								userList.add(user);
+								int size=Integer.parseInt(bufferedReader.readLine());
+								ArrayList<User> userList=new ArrayList<User>();
+								for(int i=0;i<size;i++)
+								{
+									String name=bufferedReader.readLine();
+									String nickName=bufferedReader.readLine();
+									String iconFile=bufferedReader.readLine();
+									User user=new User(name, nickName, iconFile, null, null);
+									userList.add(user);
+								}
+								list_UserList.setModel(new MyListModel<Object>(userList));
+								list_UserList.setCellRenderer(new MyListCellRenderer());
+								continue;
 							}
-							list_UserList.setModel(new MyListModel<Object>(userList));
-							list_UserList.setCellRenderer(new MyListCellRenderer());
-							System.out.println("list updated");
-							continue;
-						}
 
-						if(string.equals("#Message"))//received group message
-						{
-							String time=bufferedReader.readLine();
-							String source=bufferedReader.readLine();
-							String message=bufferedReader.readLine();
+							if(string.equals("#Message"))//received group message
+							{
+								String time=bufferedReader.readLine();
+								String source=bufferedReader.readLine();
+								String message=bufferedReader.readLine();
 
-							//Unfinished:textpane
+								//Unfinished:textpane
 
-							continue;
-						}
+								continue;
+							}
 
-						if(string.equals("#Message From"))//received private message
-						{
-							String time=bufferedReader.readLine();
-							String source=bufferedReader.readLine();
-							String message=bufferedReader.readLine();
+							if(string.equals("#Message From"))//received private message
+							{
+								String time=bufferedReader.readLine();
+								String source=bufferedReader.readLine();
+								String message=bufferedReader.readLine();
 
-							//Unfinished:new private chat frame
+								//Unfinished:new private chat frame
 
-							continue;
+								continue;
+							}
 						}
 					}
 				}
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -253,9 +240,12 @@ public class Client extends JFrame
 				{
 					printWriter.println("#Logout");
 					printWriter.flush();
-					socket.shutdownInput();
-					socket.shutdownOutput();
-					socket.close();
+					if(bufferedReader.readLine()=="#Confirm")
+					{
+						socket.shutdownInput();
+						socket.shutdownOutput();
+						socket.close();
+					}
 					//super.windowClosing(e);
 				}
 				catch (Exception E)
@@ -477,17 +467,11 @@ public class Client extends JFrame
 					if(response.equals("#Login Success"))
 					{
 						userName=bufferedReader.readLine();
-						System.out.println("available:"+socket.getInputStream().available());
 						userNickName=bufferedReader.readLine();
-						System.out.println("available:"+socket.getInputStream().available());
 						logpad.setVisible(false);
-						System.out.println("available:"+socket.getInputStream().available());
 						setVisible(true);
-						System.out.println("available:"+socket.getInputStream().available());
 						setTitle("CharRoomPlus -"+userName);
-						System.out.println("available:"+socket.getInputStream().available());
 						new ListenThread().start();
-						System.out.println("available:"+socket.getInputStream().available());
 					}
 					else
 						if(response.equals("#Login Failed"))

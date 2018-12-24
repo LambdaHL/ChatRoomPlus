@@ -1,14 +1,10 @@
 package server;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.ListCellRenderer;
 
 public class MyListCellRenderer extends DefaultListCellRenderer
 {
