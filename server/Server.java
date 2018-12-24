@@ -192,6 +192,7 @@ public class Server extends JFrame
 										printWriter.flush();
 										userList.add(this.getUser());
 										this.user=this.getUser();
+										
 										updateUserList();
 										break;
 									}
@@ -362,23 +363,20 @@ public class Server extends JFrame
 							System.out.println("	continued");
 							continue;
 						}
-						else
-						{
-							pWriter.println("#Update List");
-							pWriter.println(userList.size()-1);
-							pWriter.println(userList.get(i).name);
-							pWriter.println(userList.get(i).nickName);
-							String iconPath=userList.get(i).icon;
-							File iconFile=new File(iconPath);
-							pWriter.println(iconFile.getName());
-							pWriter.flush();
-							DataInputStream dataInputStream=new DataInputStream(new FileInputStream(iconFile));
-							DataOutputStream dataOutputStrem=new DataOutputStream(userList.get(i).socket.getOutputStream());
-							byte[] bytes=new byte[2048];
-							int length=dataInputStream.read(bytes);
-							dataOutputStrem.write(bytes, 0, length);
-							dataOutputStrem.flush();
-						}
+						pWriter.println("#Update List");
+						pWriter.println(userList.size()-1);
+						pWriter.println(userList.get(i).name);
+						pWriter.println(userList.get(i).nickName);
+						String iconPath=userList.get(i).icon;
+						File iconFile=new File(iconPath);
+						pWriter.println(iconFile.getName());
+						pWriter.flush();
+						DataInputStream dataInputStream=new DataInputStream(new FileInputStream(iconFile));
+						DataOutputStream dataOutputStrem=new DataOutputStream(userList.get(i).socket.getOutputStream());
+						byte[] bytes=new byte[2048];
+						int length=dataInputStream.read(bytes);
+						dataOutputStrem.write(bytes, 0, length);
+						dataOutputStrem.flush();
 						System.out.println();
 					}
 				}

@@ -477,11 +477,17 @@ public class Client extends JFrame
 					if(response.equals("#Login Success"))
 					{
 						userName=bufferedReader.readLine();
+						System.out.println("available:"+socket.getInputStream().available());
 						userNickName=bufferedReader.readLine();
+						System.out.println("available:"+socket.getInputStream().available());
 						logpad.setVisible(false);
+						System.out.println("available:"+socket.getInputStream().available());
 						setVisible(true);
+						System.out.println("available:"+socket.getInputStream().available());
 						setTitle("CharRoomPlus -"+userName);
+						System.out.println("available:"+socket.getInputStream().available());
 						new ListenThread().start();
+						System.out.println("available:"+socket.getInputStream().available());
 					}
 					else
 						if(response.equals("#Login Failed"))
@@ -503,7 +509,6 @@ public class Client extends JFrame
 									textField_UserName.setText("");
 									passwordField.setText("");
 								}
-					System.out.println("available:"+socket.getInputStream().available());
 				}
 				catch (Exception E)
 				{
