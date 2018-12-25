@@ -6,6 +6,8 @@ import java.net.*;
 import java.text.SimpleDateFormat;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.util.ArrayList;
 import java.util.Date;
 import java.io.*;
@@ -20,12 +22,13 @@ public class Client extends JFrame
 	private JList<Object> list_UserList,list_Friends;
 	private JTextPane textPane;
 	private JTextField textField;
-	private JToggleButton tglbtn_Bold, tglbtn_Italic, tglbtn_Underline;
+	private JToggleButton tglbtn_Bold, tglbtn_Italic;
 	private JButton btn_Register, btn_Login;
-	private JComboBox comboBox, comboBox_1;
+	private JComboBox comboBox_FontName, comboBox_FontSize;
 	private JButton btn_Config, btn_Enter, btn_Color, btn_AddFriend, btn_DeleteFriend, btn_SendFile;
 	private JFrame logpad;
-	private String userName,userNickName,password,icon;
+	private String userName,userNickName,password,icon,fontName;
+	private int fontStyle,fontSize;
 	private PrintWriter printWriter;
 	private BufferedReader bufferedReader;
 	private Font font;
@@ -92,7 +95,10 @@ public class Client extends JFrame
 									String name=bufferedReader.readLine();
 									String nickName=bufferedReader.readLine();
 									String iconFile=bufferedReader.readLine();
-									User user=new User(name, nickName, iconFile, null, null);
+									String fontName=bufferedReader.readLine();
+									int fontStyle=Integer.parseInt(bufferedReader.readLine());
+									int fontSize=Integer.parseInt(bufferedReader.readLine());
+									User user=new User(name, nickName, iconFile, null, null, fontName, fontStyle, fontSize);
 									userList.add(user);
 								}
 								list_UserList.setModel(new MyListModel<Object>(userList));
@@ -105,7 +111,9 @@ public class Client extends JFrame
 								String time=bufferedReader.readLine();
 								String source=bufferedReader.readLine();
 								String message=bufferedReader.readLine();
-
+								System.out.println(time);
+								System.out.println(source);
+								System.out.println(message);
 								//Unfinished:textpane
 
 								continue;
@@ -182,34 +190,32 @@ public class Client extends JFrame
 		JToolBar toolBar = new JToolBar();
 		toolBar.setBackground(UIManager.getColor("Button.background"));
 		toolBar.setFloatable(false);
-		toolBar.setBounds(0, 475, 620, 37);
+		toolBar.setBounds(98, 475, 522, 37);
 		contentPane.add(toolBar);
 		
 		tglbtn_Bold = new JToggleButton("");
 		tglbtn_Bold.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/bold.png")));
-		toolBar.add(tglbtn_Bold);
+		tglbtn_Bold.setBounds(10, 475, 39, 35);
+		contentPane.add(tglbtn_Bold);
 		
 		tglbtn_Italic = new JToggleButton("");
 		tglbtn_Italic.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/italic.png")));
-		toolBar.add(tglbtn_Italic);
+		tglbtn_Italic.setBounds(49, 475, 39, 35);
+		contentPane.add(tglbtn_Italic);
 		
-		tglbtn_Underline = new JToggleButton("");
-		tglbtn_Underline.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/underline.png")));
-		toolBar.add(tglbtn_Underline);
-		
-		comboBox = new JComboBox();
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"微软雅黑", "Consola", "Courier New"}));
-		comboBox.setFont(new Font("微软雅黑", Font.PLAIN, 14));
-		comboBox.setMaximumRowCount(3);
-		toolBar.add(comboBox);
+		comboBox_FontName = new JComboBox();
+		comboBox_FontName.setModel(new DefaultComboBoxModel(new String[] {"Microsoft YaHei", "Consola", "Courier New"}));
+		comboBox_FontName.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
+		comboBox_FontName.setMaximumRowCount(3);
+		toolBar.add(comboBox_FontName);
 		
 		Component horizontalStrut_1 = Box.createHorizontalStrut(10);
 		toolBar.add(horizontalStrut_1);
 		
-		comboBox_1 = new JComboBox();
-		comboBox_1.setFont(new Font("Courier New", Font.PLAIN, 18));
-		comboBox_1.setModel(new DefaultComboBoxModel(new String[] {"14", "16", "18", "20", "22", "24"}));
-		toolBar.add(comboBox_1);
+		comboBox_FontSize = new JComboBox();
+		comboBox_FontSize.setFont(new Font("Courier New", Font.PLAIN, 18));
+		comboBox_FontSize.setModel(new DefaultComboBoxModel(new String[] {"14", "16", "18", "20", "22", "24"}));
+		toolBar.add(comboBox_FontSize);
 		
 		Component horizontalStrut_2 = Box.createHorizontalStrut(10);
 		toolBar.add(horizontalStrut_2);
@@ -222,7 +228,7 @@ public class Client extends JFrame
 		btn_SendFile.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/file.png")));
 		toolBar.add(btn_SendFile);
 		
-		Component horizontalStrut = Box.createHorizontalStrut(200);
+		Component horizontalStrut = Box.createHorizontalStrut(180);
 		toolBar.add(horizontalStrut);
 
 		btn_Config = new JButton("");
@@ -338,6 +344,11 @@ public class Client extends JFrame
 			@Override
 			public void actionPerformed(ActionEvent e) 
 			{
+				printWriter.println("#Update Font");
+				printWriter.println(fontName);
+				printWriter.println(fontStyle);
+				printWriter.println(fontSize);
+				printWriter.flush();
 				printWriter.println("#Message");
 				SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 				String time=simpleDateFormat.format(new Date());
@@ -495,7 +506,183 @@ public class Client extends JFrame
 			}
 		});
 		
+		tglbtn_Italic.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				if(tglbtn_Bold.isSelected())
+				{
+					if(tglbtn_Italic.isSelected())
+					{
+						font=new Font(fontName,Font.BOLD+Font.ITALIC,font.getSize());
+						fontStyle=Font.BOLD+Font.ITALIC;
+						textField.setFont(font);
+					}
+					else
+					{
+						font=new Font(fontName,Font.BOLD,font.getSize());
+						fontStyle=Font.BOLD;
+						textField.setFont(font);
+					}
+				}
+				else
+				{
+					if(tglbtn_Italic.isSelected())
+					{
+						font=new Font(fontName,Font.ITALIC,font.getSize());
+						fontStyle=Font.ITALIC;
+						textField.setFont(font);
+					}
+					else
+					{
+						font=new Font(fontName,Font.PLAIN,font.getSize());
+						fontStyle=Font.PLAIN;
+						textField.setFont(font);
+					}
+				}
+			}
+		});
 		
+		tglbtn_Bold.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				if(tglbtn_Bold.isSelected())
+				{
+					if(tglbtn_Italic.isSelected())
+					{
+						font=new Font(fontName,Font.BOLD+Font.ITALIC,font.getSize());
+						fontStyle=Font.BOLD+Font.ITALIC;
+						textField.setFont(font);
+					}
+					else
+					{
+						font=new Font(fontName,Font.BOLD,font.getSize());
+						fontStyle=Font.BOLD;
+						textField.setFont(font);
+					}
+				}
+				else
+				{
+					if(tglbtn_Italic.isSelected())
+					{
+						font=new Font(fontName,Font.ITALIC,font.getSize());
+						fontStyle=Font.ITALIC;
+						textField.setFont(font);
+					}
+					else
+					{
+						font=new Font(fontName,Font.PLAIN,font.getSize());
+						fontStyle=Font.PLAIN;
+						textField.setFont(font);
+					}
+				}
+			}
+		});
+		
+		comboBox_FontName.addItemListener(new ItemListener()
+		{
+			@Override
+			public void itemStateChanged(ItemEvent e) 
+			{
+				if(e.getStateChange()==ItemEvent.SELECTED)
+				{
+					switch (comboBox_FontName.getSelectedIndex())
+					{
+						case 0://Microsoft YaHei
+						{
+							font=new Font("Microsoft YaHei",font.getStyle(),font.getSize());
+							fontName="Microsoft YaHei";
+							textField.setFont(font);
+							break;
+						}
+						case 1://Consola
+						{
+							font=new Font("Consola",font.getStyle(),font.getSize());
+							fontName="Consola";
+							textField.setFont(font);
+							break;
+						}
+						case 2://Courier New
+						{
+							font=new Font("Courier New",font.getStyle(),font.getSize());
+							fontName="Courier New";
+							textField.setFont(font);
+							break;
+						}
+					}
+				}
+			}
+		});
+		
+		comboBox_FontSize.addItemListener(new ItemListener()
+		{
+			@Override
+			public void itemStateChanged(ItemEvent e) 
+			{
+				if(e.getStateChange()==ItemEvent.SELECTED)
+				{
+					switch (comboBox_FontSize.getSelectedIndex())
+					{
+						case 0://14
+						{
+							font=new Font(font.getFontName(), font.getStyle(), 14);
+							fontSize=14;
+							textField.setFont(font);
+							break;
+						}
+						case 1://16
+						{
+							font=new Font(font.getFontName(), font.getStyle(), 16);
+							fontSize=16;
+							textField.setFont(font);
+							break;
+						}
+						case 2://18
+						{
+							font=new Font(font.getFontName(), font.getStyle(), 18);
+							fontSize=18;
+							textField.setFont(font);
+							break;
+						}
+						case 3://20
+						{
+							font=new Font(font.getFontName(), font.getStyle(), 20);
+							fontSize=20;
+							textField.setFont(font);
+							break;
+						}
+						case 4://22
+						{
+							font=new Font(font.getFontName(), font.getStyle(), 22);
+							fontSize=22;
+							textField.setFont(font);
+							break;
+						}
+						case 5://24
+						{
+							font=new Font(font.getFontName(), font.getStyle(), 24);
+							fontSize=24;
+							textField.setFont(font);
+							break;
+						}
+					}
+				}
+			}
+		});
+	
+		btn_Color.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				JColorChooser jColorChooser=new JColorChooser(Color.BLACK);
+				Color customColor=jColorChooser.showDialog(null, "Set text color", Color.BLACK);
+				textField.setForeground(customColor);
+			}
+		});
 	}
 
 	private void createLogPad()
@@ -684,6 +871,88 @@ public class Client extends JFrame
 						userName=bufferedReader.readLine();
 						userNickName=bufferedReader.readLine();
 						icon=bufferedReader.readLine();
+						fontName=bufferedReader.readLine();
+						fontStyle=Integer.parseInt(bufferedReader.readLine());
+						fontSize=Integer.parseInt(bufferedReader.readLine());
+						font=new Font(fontName, fontStyle, fontSize);
+						textField.setFont(font);
+						switch (fontSize)
+						{
+							case 14:
+							{
+								comboBox_FontSize.setSelectedIndex(0);
+								break;
+							}
+							case 16:
+							{
+								comboBox_FontSize.setSelectedIndex(1);
+								break;
+							}
+							case 18:
+							{
+								comboBox_FontSize.setSelectedIndex(2);
+								break;
+							}
+							case 20:
+							{
+								comboBox_FontSize.setSelectedIndex(3);
+								break;
+							}
+							case 22:
+							{
+								comboBox_FontSize.setSelectedIndex(4);
+								break;
+							}
+							case 24:
+							{
+								comboBox_FontSize.setSelectedIndex(5);
+								break;
+							}
+						}
+						switch (fontStyle)
+						{
+							case Font.PLAIN:
+							{
+								tglbtn_Bold.setSelected(false);
+								tglbtn_Italic.setSelected(false);
+								break;
+							}
+							case Font.BOLD:
+							{
+								System.out.println(Font.BOLD);
+								tglbtn_Bold.setSelected(true);
+								break;
+							}
+							case Font.ITALIC:
+							{
+								tglbtn_Italic.setSelected(true);
+								break;
+							}
+							case Font.BOLD+Font.ITALIC:
+							{
+								tglbtn_Bold.setSelected(true);
+								tglbtn_Italic.setSelected(true);
+								break;
+							}
+						}
+						switch (fontName)
+						{
+							case "Microsoft YaHei":
+							{
+								comboBox_FontName.setSelectedIndex(0);
+								break;
+							}
+							case "Consolas":
+							{
+								comboBox_FontName.setSelectedIndex(1);
+								break;
+							}
+							case "Courier New":
+							{
+								comboBox_FontName.setSelectedIndex(2);
+								break;
+							}
+						}
 						label_Top.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/"+icon+".png")));
 						label_Top.setText(userName+"    "+userNickName);
 						logpad.setVisible(false);

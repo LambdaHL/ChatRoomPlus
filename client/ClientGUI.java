@@ -75,34 +75,22 @@ public class ClientGUI extends JFrame {
 		JToolBar toolBar = new JToolBar();
 		toolBar.setBackground(UIManager.getColor("Button.background"));
 		toolBar.setFloatable(false);
-		toolBar.setBounds(0, 475, 620, 37);
+		toolBar.setBounds(98, 475, 522, 37);
 		contentPane.add(toolBar);
 		
-		JToggleButton tglbtn_Bold = new JToggleButton("");
-		tglbtn_Bold.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/bold.png")));
-		toolBar.add(tglbtn_Bold);
-		
-		JToggleButton tglbtn_Italic = new JToggleButton("");
-		tglbtn_Italic.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/italic.png")));
-		toolBar.add(tglbtn_Italic);
-		
-		JToggleButton tglbtn_Underline = new JToggleButton("");
-		tglbtn_Underline.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/underline.png")));
-		toolBar.add(tglbtn_Underline);
-		
-		JComboBox comboBox = new JComboBox();
-		comboBox.setModel(new DefaultComboBoxModel(new String[] {"微软雅黑", "Consola", "Courier New"}));
-		comboBox.setFont(new Font("微软雅黑", Font.PLAIN, 14));
-		comboBox.setMaximumRowCount(3);
-		toolBar.add(comboBox);
+		JComboBox comboBox_FontName = new JComboBox();
+		comboBox_FontName.setModel(new DefaultComboBoxModel(new String[] {"微软雅黑", "Consola", "Courier New"}));
+		comboBox_FontName.setFont(new Font("微软雅黑", Font.PLAIN, 14));
+		comboBox_FontName.setMaximumRowCount(3);
+		toolBar.add(comboBox_FontName);
 		
 		Component horizontalStrut_1 = Box.createHorizontalStrut(10);
 		toolBar.add(horizontalStrut_1);
 		
-		JComboBox comboBox_1 = new JComboBox();
-		comboBox_1.setFont(new Font("Courier New", Font.PLAIN, 18));
-		comboBox_1.setModel(new DefaultComboBoxModel(new String[] {"14", "16", "18", "20", "22", "24"}));
-		toolBar.add(comboBox_1);
+		JComboBox comboBox_FontSize = new JComboBox();
+		comboBox_FontSize.setFont(new Font("Courier New", Font.PLAIN, 18));
+		comboBox_FontSize.setModel(new DefaultComboBoxModel(new String[] {"14", "16", "18", "20", "22", "24"}));
+		toolBar.add(comboBox_FontSize);
 		
 		Component horizontalStrut_2 = Box.createHorizontalStrut(10);
 		toolBar.add(horizontalStrut_2);
@@ -202,5 +190,15 @@ public class ClientGUI extends JFrame {
 		label_Top.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
 		label_Top.setBounds(0, 0, 622, 24);
 		contentPane.add(label_Top);
+		
+		JToggleButton tglbtn_Italic = new JToggleButton("");
+		tglbtn_Italic.setBounds(49, 475, 39, 35);
+		contentPane.add(tglbtn_Italic);
+		tglbtn_Italic.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/italic.png")));
+		
+		JToggleButton tglbtn_Bold = new JToggleButton("");
+		tglbtn_Bold.setBounds(10, 475, 39, 35);
+		contentPane.add(tglbtn_Bold);
+		tglbtn_Bold.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/bold.png")));
 	}
 }

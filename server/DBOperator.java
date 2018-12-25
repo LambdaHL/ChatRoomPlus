@@ -1,5 +1,6 @@
 package server;
 
+import java.awt.Font;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -35,12 +36,13 @@ public class DBOperator
     {
         try
         {
-            String sql="INSERT INTO User(username,usernickname,password,icon,logstatus) VALUES(?,?,?,?,0)";
+            String sql="INSERT INTO User(username,usernickname,password,icon,logstatus,fontname,fontsize,fontstyle) VALUES(?,?,?,?,0,?,14,0)";
             preparedStatement=connection.prepareStatement(sql);
             preparedStatement.setString(1, userName);
             preparedStatement.setString(2, userNickName);
             preparedStatement.setString(3, password);
             preparedStatement.setString(4, "0");
+            preparedStatement.setString(5, "Microsoft YaHei");
             preparedStatement.executeUpdate();
             return REG_USERNAME_SUCCESS;
         }
@@ -299,6 +301,107 @@ public class DBOperator
     		e.printStackTrace();
     	}
     	return false;
+    }
+    
+    public Font getFont(String userName)
+    {
+    	try
+    	{
+    		String sql="SELECT fontname,fontstyle,fontsize FROM User WHERE username=?";
+    		preparedStatement=connection.prepareStatement(sql);
+    		preparedStatement.setString(1, userName);
+    		preparedStatement.executeQuery();
+    		ResultSet resultSet=preparedStatement.getResultSet();
+    		resultSet.next();
+    		String fontname=resultSet.getString(1);
+    		int fontstyle=resultSet.getInt(2);
+    		int fontsize=resultSet.getInt(3);
+    		Font font=new Font(fontname, fontstyle, fontsize);
+    		return font;
+    	}
+    	catch (Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    	return null;
+    }
+    
+    public void updateFont(String userName,String fontname,int fontstyle,int fontsize)
+    {
+    	try
+    	{
+    		String sql="UPDATE User SET fontname=?, fontstyle=?, fontsize=? WHERE username=?";
+    		preparedStatement=connection.prepareStatement(sql);
+    		preparedStatement.setString(1, fontname);
+    		preparedStatement.setInt(2, fontstyle);
+    		preparedStatement.setInt(3, fontsize);
+    		preparedStatement.setString(4, userName);
+    		preparedStatement.executeUpdate();
+    	}
+    	catch (Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    }
+    
+    public String getFontName(String userName)
+    {
+    	try
+    	{
+    		String sql="SELECT fontname FROM User WHERE username=?";
+    		preparedStatement=connection.prepareStatement(sql);
+    		preparedStatement.setString(1, userName);
+    		preparedStatement.executeQuery();
+    		ResultSet resultSet=preparedStatement.getResultSet();
+    		resultSet.next();
+    		String fontName=resultSet.getString(1);
+    		return fontName;
+    	}
+    	catch (Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    	return null;
+    }
+    
+    public int getFontStyle(String userName)
+    {
+    	try
+    	{
+    		String sql="SELECT fontstyle FROM User WHERE username=?";
+    		preparedStatement=connection.prepareStatement(sql);
+    		preparedStatement.setString(1, userName);
+    		preparedStatement.executeQuery();
+    		ResultSet resultSet=preparedStatement.getResultSet();
+    		resultSet.next();
+    		int fontStyle=resultSet.getInt(1);
+    		return fontStyle;
+    	}
+    	catch (Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    	return 0;
+    }
+    
+    public int getFontSize(String userName)
+    {
+    	try
+    	{
+    		String sql="SELECT fontsize FROM User WHERE username=?";
+    		preparedStatement=connection.prepareStatement(sql);
+    		preparedStatement.setString(1, userName);
+    		preparedStatement.executeQuery();
+    		ResultSet resultSet=preparedStatement.getResultSet();
+    		resultSet.next();
+    		int fontSize=resultSet.getInt(1);
+    		return fontSize;
+    	}
+    	catch (Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    	return 0;
     }
     
     public void reset()

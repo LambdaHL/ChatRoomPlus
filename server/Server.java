@@ -2,6 +2,7 @@ package server;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import java.awt.Font;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
 import java.io.*;
@@ -130,6 +131,9 @@ public class Server extends JFrame
 		private SimpleDateFormat simpleDateFormat;
 		private boolean isLoggedout;
 		private User user;
+		private Font font;
+		private String fontName;
+		private int fontStyle,fontSize;
 		
 		@Override
 		public void run()//individual listen
@@ -188,10 +192,17 @@ public class Server extends JFrame
 										isLoggedout=false;
 										this.userName=userName;
 										this.userNickName=dbOperator.getUserNickName(userName);
+										this.font=dbOperator.getFont(userName);
+										this.fontName=dbOperator.getFontName(userName);
+										this.fontStyle=dbOperator.getFontStyle(userName);
+										this.fontSize=dbOperator.getFontSize(userName);
 										icon=dbOperator.getUserIcon(userName);
 										printWriter.println(this.userName);
 										printWriter.println(this.userNickName);
 										printWriter.println(this.icon);
+										printWriter.println(this.fontName);
+										printWriter.println(this.fontStyle);
+										printWriter.println(this.fontSize);
 										printWriter.flush();
 										userList.add(this.getUser());
 										this.user=this.getUser();
@@ -313,7 +324,14 @@ public class Server extends JFrame
 							continue;
 						}
 						
-						
+						if(string.equals("#Update Font"))
+						{
+							fontName=bufferedReader.readLine();
+							fontStyle=Integer.parseInt(bufferedReader.readLine());
+							fontSize=Integer.parseInt(bufferedReader.readLine());
+							dbOperator.updateFont(userName, fontName, fontStyle, fontSize);
+							continue;
+						}
 					}
 				}
 			}
@@ -379,7 +397,7 @@ public class Server extends JFrame
 
 		public User getUser()
 		{
-			User user=new User(userName, userNickName, icon, socket.getInetAddress().toString()+":"+socket.getPort(), socket);
+			User user=new User(userName, userNickName, icon, socket.getInetAddress().toString()+":"+socket.getPort(), socket, fontName, fontStyle, fontSize);
 			return user;
 		}
 		
@@ -407,6 +425,9 @@ public class Server extends JFrame
 						pWriter.println(userList.get(i).name);
 						pWriter.println(userList.get(i).nickName);
 						pWriter.println(userList.get(i).icon);
+						pWriter.println(userList.get(i).fontName);
+						pWriter.println(userList.get(i).fontStyle);
+						pWriter.println(userList.get(i).fontSize);
 						pWriter.flush();
 					}
 				}
