@@ -136,11 +136,29 @@ public class ClientGUI extends JFrame {
 		JMenuItem mntmShowRecord = new JMenuItem("Show Message Record");
 		popupMenu.add(mntmShowRecord);
 		
-		JMenuItem mntmChangeIcon = new JMenuItem("Change Icon");
-		popupMenu.add(mntmChangeIcon);
-		
 		JMenuItem mntmChangePassword = new JMenuItem("Change Password");
 		popupMenu.add(mntmChangePassword);
+		
+		JMenu mnChangeIcon = new JMenu("Change Icon");
+		popupMenu.add(mnChangeIcon);
+		
+		JMenuItem mntmChangeIcon1 = new JMenuItem(new ImageIcon(ClientGUI.class.getResource("/client/Icons/1.png")));
+		mnChangeIcon.add(mntmChangeIcon1);
+		
+		JMenuItem mntmChangeIcon2 = new JMenuItem(new ImageIcon(ClientGUI.class.getResource("/client/Icons/2.png")));
+		mnChangeIcon.add(mntmChangeIcon2);
+		
+		JMenuItem mntmChangeIcon3 = new JMenuItem(new ImageIcon(ClientGUI.class.getResource("/client/Icons/3.png")));
+		mnChangeIcon.add(mntmChangeIcon3);
+		
+		JMenuItem mntmChangeIcon4 = new JMenuItem(new ImageIcon(ClientGUI.class.getResource("/client/Icons/4.png")));
+		mnChangeIcon.add(mntmChangeIcon4);
+		
+		JMenuItem mntmChangeIcon5 = new JMenuItem(new ImageIcon(ClientGUI.class.getResource("/client/Icons/5.png")));
+		mnChangeIcon.add(mntmChangeIcon5);
+		
+		JMenuItem mntmChangeIcon0 = new JMenuItem(new ImageIcon(ClientGUI.class.getResource("/client/Icons/0.png")));
+		mnChangeIcon.add(mntmChangeIcon0);
 		
 		JButton btn_Enter = new JButton("");
 		btn_Enter.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/enter.png")));
