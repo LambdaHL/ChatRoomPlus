@@ -19,15 +19,18 @@ public class Client extends JFrame
 	private Socket socket;
 	private JList<Object> list_UserList,list_Friends;
 	private JTextPane textPane;
-	private JEditorPane editorPane;
+	private JTextField textField;
 	private JToggleButton tglbtn_Bold, tglbtn_Italic, tglbtn_Underline;
 	private JButton btn_Register, btn_Login;
 	private JComboBox comboBox, comboBox_1;
-	private JButton btn_Enter;
+	private JButton btn_Config, btn_Enter, btn_Color, btn_AddFriend, btn_DeleteFriend, btn_SendFile;
 	private JFrame logpad;
 	private String userName,userNickName;
 	private PrintWriter printWriter;
 	private BufferedReader bufferedReader;
+	private Font font;
+	private JPopupMenu popupMenu;
+	private JMenuItem mntmChangePassword, mntmChangeIcon, mntmShowRecoord;
 	
 	public Client()
 	{
@@ -141,7 +144,7 @@ public class Client extends JFrame
 		setTitle("CharRoomPlus");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 855, 656);
+		setBounds(100, 100, 855, 607);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -166,12 +169,13 @@ public class Client extends JFrame
 		
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setAutoscrolls(true);
-		scrollPane.setBounds(0, 515, 558, 100);
+		scrollPane.setBounds(0, 515, 558, 52);
 		contentPane.add(scrollPane);
 		
-		editorPane = new JEditorPane();
-		editorPane.setLocation(0, 515);
-		scrollPane.setViewportView(editorPane);
+		textField = new JTextField();
+		textField.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
+		scrollPane.setViewportView(textField);
+		textField.setColumns(10);
 		
 		JToolBar toolBar = new JToolBar();
 		toolBar.setBackground(UIManager.getColor("Button.background"));
@@ -202,20 +206,46 @@ public class Client extends JFrame
 		
 		comboBox_1 = new JComboBox();
 		comboBox_1.setFont(new Font("Courier New", Font.PLAIN, 18));
-		comboBox_1.setModel(new DefaultComboBoxModel(new String[] {"12", "14", "16", "18", "20", "22", "24"}));
+		comboBox_1.setModel(new DefaultComboBoxModel(new String[] {"14", "16", "18", "20", "22", "24"}));
 		toolBar.add(comboBox_1);
+		
+		Component horizontalStrut_2 = Box.createHorizontalStrut(10);
+		toolBar.add(horizontalStrut_2);
+		
+		btn_Color = new JButton("");
+		btn_Color.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/color.png")));
+		toolBar.add(btn_Color);
+		
+		btn_SendFile = new JButton("");
+		btn_SendFile.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/file.png")));
+		toolBar.add(btn_SendFile);
 		
 		Component horizontalStrut = Box.createHorizontalStrut(200);
 		toolBar.add(horizontalStrut);
+
+		btn_Config = new JButton("");
+		btn_Config.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/setting.png")));
+		toolBar.add(btn_Config);
+
+		popupMenu = new JPopupMenu();
 		
+		mntmShowRecoord = new JMenuItem("Show Message Record");
+		popupMenu.add(mntmShowRecoord);
+
+		mntmChangeIcon = new JMenuItem("Change Icon");
+		popupMenu.add(mntmChangeIcon);
+
+		mntmChangePassword = new JMenuItem("Change Password");
+		popupMenu.add(mntmChangePassword);
+
 		btn_Enter = new JButton("");
 		btn_Enter.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/enter.png")));
-		btn_Enter.setBounds(560, 515, 60, 100);
+		btn_Enter.setBounds(560, 515, 60, 52);
 		contentPane.add(btn_Enter);
 		
 		JScrollPane scrollPane_Friends = new JScrollPane();
 		scrollPane_Friends.setAutoscrolls(true);
-		scrollPane_Friends.setBounds(630, 334, 208, 281);
+		scrollPane_Friends.setBounds(630, 334, 208, 233);
 		contentPane.add(scrollPane_Friends);
 		
 		list_Friends = new JList<>();
@@ -230,6 +260,16 @@ public class Client extends JFrame
 		lblNewLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
 		lblNewLabel.setBounds(630, 316, 70, 19);
 		contentPane.add(lblNewLabel);
+		
+		btn_AddFriend = new JButton("");
+		btn_AddFriend.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/add.png")));
+		btn_AddFriend.setBounds(805, 306, 32, 28);
+		contentPane.add(btn_AddFriend);
+		
+		btn_DeleteFriend = new JButton("");
+		btn_DeleteFriend.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/del.png")));
+		btn_DeleteFriend.setBounds(770, 306, 32, 28);
+		contentPane.add(btn_DeleteFriend);
 		
 		addWindowListener(new WindowAdapter()
 		{
@@ -254,8 +294,16 @@ public class Client extends JFrame
 				}
 			}
 		});
+
+		btn_Config.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseReleased(MouseEvent e)
+			{
+					popupMenu.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
 		
-		btn_Enter.setMnemonic(KeyEvent.VK_ENTER);
 		btn_Enter.addActionListener(new ActionListener() 
 		{
 			@Override
@@ -267,7 +315,7 @@ public class Client extends JFrame
 				printWriter.println(time);
 				String source=userName;
 				printWriter.println(source);
-				String message=editorPane.getText();
+				String message=textField.getText();
 				//#Message
 				//1980-1-1 00:00:00
 				//Aris
