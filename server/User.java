@@ -32,4 +32,11 @@ public class User
 			e.printStackTrace();
 		}
 	}
+	
+	public void refresh()
+	{
+		String iconPath=System.getProperty("user.dir")+"\\server\\Icons\\"+icon+".png";
+		imageIcon=new ImageIcon(iconPath);
+		image=imageIcon.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT);
+	}
 }

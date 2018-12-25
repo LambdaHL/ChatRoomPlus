@@ -55,7 +55,7 @@ public class ClientGUI extends JFrame {
 		
 		JScrollPane scrollPane_Message = new JScrollPane();
 		scrollPane_Message.setAutoscrolls(true);
-		scrollPane_Message.setBounds(0, 0, 622, 471);
+		scrollPane_Message.setBounds(0, 25, 622, 446);
 		contentPane.add(scrollPane_Message);
 		
 		JTextPane textPane = new JTextPane();
@@ -139,6 +139,9 @@ public class ClientGUI extends JFrame {
 		JMenuItem mntmChangePassword = new JMenuItem("Change Password");
 		popupMenu.add(mntmChangePassword);
 		
+		JMenuItem mntmChangeNickName = new JMenuItem("Change NickName");
+		popupMenu.add(mntmChangeNickName);
+		
 		JMenu mnChangeIcon = new JMenu("Change Icon");
 		popupMenu.add(mnChangeIcon);
 		
@@ -194,6 +197,10 @@ public class ClientGUI extends JFrame {
 		button_DeleteFriend.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/del.png")));
 		button_DeleteFriend.setBounds(770, 306, 32, 28);
 		contentPane.add(button_DeleteFriend);
+		
+		JLabel label_Top = new JLabel("");
+		label_Top.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
+		label_Top.setBounds(0, 0, 622, 24);
+		contentPane.add(label_Top);
 	}
-
 }

@@ -15,9 +15,6 @@ public class DBOperator
     public static final int LOGIN_SQLERROR=3;
     public static final int REG_USERNAME_SUCCESS=0;
     public static final int REG_USERNAME_EXISITED=1;
-    public static final int UPDATE_PWD_SUCCESS=0;
-    public static final int UPDATE_PWD_OPWD_ERROR=1;
-    public static final int UPDATE_PWD_SQLERROR=2;
     private Connection connection;
     private PreparedStatement preparedStatement;
     
@@ -130,7 +127,7 @@ public class DBOperator
         }
     }
 
-    public boolean updateNickName(String userName, String nickName)
+    public void updateNickName(String userName, String nickName)
     {
         try
         {
@@ -139,42 +136,26 @@ public class DBOperator
             preparedStatement.setString(1, nickName);
             preparedStatement.setString(2, userName);
             preparedStatement.executeUpdate();
-            return true;
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            return false;
         }
     }
 
-    public int updatePassword(String userName, String originalPassword, String newPassword)
+    public void updatePassword(String userName,String newPassword)
     {
         try
         {
-            String sql="SELECT password FROM User WHERE username=?";
-            preparedStatement=connection.prepareStatement(sql);
-            preparedStatement.setString(1, userName);
-            preparedStatement.executeQuery();
-            ResultSet resultSet=preparedStatement.getResultSet();
-            if(resultSet.getString(1).equals(originalPassword))
-            {
-                sql="UPDATE User SET password=? WHERE username=?";
-                preparedStatement=connection.prepareStatement(sql);
-                preparedStatement.setString(1, newPassword);
-                preparedStatement.setString(2, userName);
-                preparedStatement.executeQuery();
-                return UPDATE_PWD_SUCCESS;
-            }
-            else
-            {
-                return UPDATE_PWD_OPWD_ERROR;
-            }
+        	String sql="UPDATE User SET password=? WHERE username=?";
+        	preparedStatement=connection.prepareStatement(sql);
+        	preparedStatement.setString(1, newPassword);
+        	preparedStatement.setString(2, userName);
+        	preparedStatement.executeUpdate();
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            return UPDATE_PWD_SQLERROR;
         }
     }
 

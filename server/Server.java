@@ -191,6 +191,7 @@ public class Server extends JFrame
 										icon=dbOperator.getUserIcon(userName);
 										printWriter.println(this.userName);
 										printWriter.println(this.userNickName);
+										printWriter.println(this.icon);
 										printWriter.flush();
 										userList.add(this.getUser());
 										this.user=this.getUser();
@@ -271,6 +272,48 @@ public class Server extends JFrame
 							
 							continue;
 						}
+						
+						if(string.equals("#Update Icon"))
+						{
+							String icon=bufferedReader.readLine();
+							this.icon=icon;
+							for(int i=0;i<userList.size();i++)
+							{
+								if(userList.get(i).name.equals(userName))
+								{
+									userList.get(i).icon=icon;
+									userList.get(i).refresh();
+								}
+							}
+							dbOperator.updateIcon(userName, icon);
+							updateUserList();
+							continue;
+						}
+						
+						if(string.equals("#Update Nickname"))
+						{
+							String nickname=bufferedReader.readLine();
+							userNickName=nickname;
+							for(int i=0;i<userList.size();i++)
+							{
+								if(userList.get(i).name.equals(userName))
+								{
+									userList.get(i).nickName=nickname;
+								}
+							}
+							dbOperator.updateNickName(userName, nickname);
+							updateUserList();
+							continue;
+						}
+						
+						if(string.equals("#Update Password"))
+						{
+							String password=bufferedReader.readLine();
+							dbOperator.updatePassword(userName, password);
+							continue;
+						}
+						
+						
 					}
 				}
 			}

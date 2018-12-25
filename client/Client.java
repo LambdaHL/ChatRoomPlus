@@ -15,7 +15,7 @@ public class Client extends JFrame
 	private JPanel contentPane;
 	private JTextField textField_UserName;
 	private JPasswordField passwordField;
-	private JLabel label_ServerStatus;
+	private JLabel label_ServerStatus,label_Top;
 	private Socket socket;
 	private JList<Object> list_UserList,list_Friends;
 	private JTextPane textPane;
@@ -25,12 +25,12 @@ public class Client extends JFrame
 	private JComboBox comboBox, comboBox_1;
 	private JButton btn_Config, btn_Enter, btn_Color, btn_AddFriend, btn_DeleteFriend, btn_SendFile;
 	private JFrame logpad;
-	private String userName,userNickName;
+	private String userName,userNickName,password,icon;
 	private PrintWriter printWriter;
 	private BufferedReader bufferedReader;
 	private Font font;
 	private JPopupMenu popupMenu;
-	private JMenuItem mntmChangePassword, mntmShowRecoord;
+	private JMenuItem mntmChangePassword, mntmShowRecoord, mntmChangeNickName;
 	private JMenu mnChangeIcon;
 	private JMenuItem mntmChangeIcon0,mntmChangeIcon1,mntmChangeIcon2,mntmChangeIcon3,mntmChangeIcon4,mntmChangeIcon5;
 	
@@ -162,7 +162,7 @@ public class Client extends JFrame
 		
 		JScrollPane scrollPane_Message = new JScrollPane();
 		scrollPane_Message.setAutoscrolls(true);
-		scrollPane_Message.setBounds(0, 0, 622, 471);
+		scrollPane_Message.setBounds(0, 25, 622, 446);
 		contentPane.add(scrollPane_Message);
 		
 		textPane = new JTextPane();
@@ -237,6 +237,9 @@ public class Client extends JFrame
 		mntmChangePassword = new JMenuItem("Change Password");
 		popupMenu.add(mntmChangePassword);
 
+		mntmChangeNickName = new JMenuItem("Change NickName");
+		popupMenu.add(mntmChangeNickName);
+		
 		mnChangeIcon = new JMenu("Change Icon");
 		popupMenu.add(mnChangeIcon);
 
@@ -261,6 +264,7 @@ public class Client extends JFrame
 		btn_Enter = new JButton("");
 		btn_Enter.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/enter.png")));
 		btn_Enter.setBounds(560, 515, 60, 52);
+		btn_Enter.setEnabled(false);
 		contentPane.add(btn_Enter);
 		
 		JScrollPane scrollPane_Friends = new JScrollPane();
@@ -290,6 +294,11 @@ public class Client extends JFrame
 		btn_DeleteFriend.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/del.png")));
 		btn_DeleteFriend.setBounds(770, 306, 32, 28);
 		contentPane.add(btn_DeleteFriend);
+		
+		label_Top = new JLabel("");
+		label_Top.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
+		label_Top.setBounds(0, 0, 622, 24);
+		contentPane.add(label_Top);
 		
 		addWindowListener(new WindowAdapter()
 		{
@@ -345,11 +354,148 @@ public class Client extends JFrame
 				
 				//Unfinished:textpane
 				
-				textPane.setText("");
+				textField.setText("");
 				btn_Enter.setEnabled(false);
 			}
 		});
-
+		
+		textField.addKeyListener(new KeyAdapter() 
+		{
+			@Override
+			public void keyReleased(KeyEvent e)
+			{
+				if(textField.getText().isEmpty())
+					btn_Enter.setEnabled(false);
+				else
+					btn_Enter.setEnabled(true);
+				if(e.getKeyChar()==KeyEvent.VK_ENTER && btn_Enter.isEnabled())
+					btn_Enter.doClick();
+			}
+		});
+		
+		mntmChangeIcon0.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				label_Top.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/0.png")));
+				icon="0";
+				printWriter.println("#Update Icon");
+				printWriter.println("0");
+				printWriter.flush();
+			}
+		});
+		
+		mntmChangeIcon1.addActionListener(new ActionListener() 
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				label_Top.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/1.png")));
+				icon="1";
+				printWriter.println("#Update Icon");
+				printWriter.println("1");
+				printWriter.flush();
+			}
+		});
+		
+		mntmChangeIcon2.addActionListener(new ActionListener()
+		{	
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				label_Top.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/2.png")));
+				icon="2";
+				printWriter.println("#Update Icon");
+				printWriter.println("2");
+				printWriter.flush();
+			}
+		});
+		
+		mntmChangeIcon3.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				label_Top.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/3.png")));
+				icon="3";
+				printWriter.println("#Update Icon");
+				printWriter.println("3");
+				printWriter.flush();
+			}
+		});
+		
+		mntmChangeIcon4.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				label_Top.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/4.png")));
+				icon="4";
+				printWriter.println("#Update Icon");
+				printWriter.println("4");
+				printWriter.flush();
+			}
+		});
+		
+		mntmChangeIcon5.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				label_Top.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/5.png")));
+				icon="5";
+				printWriter.println("#Update Icon");
+				printWriter.println("5");
+				printWriter.flush();
+			}
+		});
+		
+		mntmChangeNickName.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				String nickname=JOptionPane.showInputDialog(null, new JLabel("Input nickname:"));
+				if(nickname!=null)
+				{
+					userNickName=nickname;
+					label_Top.setText(userName+"    "+nickname);
+					printWriter.println("#Update Nickname");
+					printWriter.println(nickname);
+					printWriter.flush();
+				}
+			}
+		});
+		
+		mntmChangePassword.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				String pwd=JOptionPane.showInputDialog(null, new JLabel("Input old password:"));
+				if(pwd!=null)
+				{
+					if(pwd.equals(password))
+					{
+						pwd=JOptionPane.showInputDialog(null, new JLabel("Input new password:"));
+						if(pwd!=null)
+						{
+							password=pwd;
+							printWriter.println("#Update Password");
+							printWriter.println(pwd);
+							printWriter.flush();
+						}
+					}
+					else
+					{
+						JOptionPane.showMessageDialog(null, new JLabel("Old password wrong"), "Warning", JOptionPane.WARNING_MESSAGE);
+					}
+				}
+			}
+		});
+		
+		
 	}
 
 	private void createLogPad()
@@ -530,15 +676,18 @@ public class Client extends JFrame
 					printWriter.println("#Login");
 					printWriter.println(textField_UserName.getText());
 					printWriter.println(new String(passwordField.getPassword()));
+					password=new String(passwordField.getPassword());
 					printWriter.flush();
 					String response=bufferedReader.readLine();
 					if(response.equals("#Login Success"))
 					{
 						userName=bufferedReader.readLine();
 						userNickName=bufferedReader.readLine();
+						icon=bufferedReader.readLine();
+						label_Top.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/"+icon+".png")));
+						label_Top.setText(userName+"    "+userNickName);
 						logpad.setVisible(false);
 						setVisible(true);
-						setTitle("CharRoomPlus -"+userName);
 						new ListenThread().start();
 					}
 					else
