@@ -6,13 +6,9 @@ import java.net.*;
 import java.text.SimpleDateFormat;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.io.*;
@@ -42,6 +38,7 @@ public class Client extends JFrame
 	private JMenu mnChangeIcon;
 	private JMenuItem mntmChangeIcon0,mntmChangeIcon1,mntmChangeIcon2,mntmChangeIcon3,mntmChangeIcon4,mntmChangeIcon5;
 	private ArrayList<User> userList;
+	private Color color;
 	
 	public Client()
 	{
@@ -105,7 +102,9 @@ public class Client extends JFrame
 									String fontName=bufferedReader.readLine();
 									int fontStyle=Integer.parseInt(bufferedReader.readLine());
 									int fontSize=Integer.parseInt(bufferedReader.readLine());
-									User user=new User(name, nickName, icon, null, null, fontName, fontStyle, fontSize);
+									int rgb=Integer.parseInt(bufferedReader.readLine());
+									Color color=new Color(rgb);
+									User user=new User(name, nickName, icon, null, null, fontName, fontStyle, fontSize, color);
 									userList.add(user);
 								}
 								if(size==0)
@@ -182,13 +181,14 @@ public class Client extends JFrame
 					break;
 				}
 			}
-			//StyleConstants.setForeground(simpleAttributeSet, fg);
+			StyleConstants.setForeground(simpleAttributeSet, color);
 			try
 			{
 				document.insertString(document.getLength(), time+"\r\n", infoAttributeSet);
 				document.insertString(document.getLength(), source+"\r\n", infoAttributeSet);
 				document.insertString(document.getLength(), message+"\r\n", simpleAttributeSet);
 				document.insertString(document.getLength(), "\r\n", infoAttributeSet);
+				textPane.setCaretPosition(textPane.getDocument().getLength());
 			}
 			catch (Exception e)
 			{
@@ -230,7 +230,7 @@ public class Client extends JFrame
 						break;
 					}
 				}
-				//StyleConstants.setForeground(simpleAttributeSet, fg);
+				StyleConstants.setForeground(simpleAttributeSet, userList.get(i).color);
 				try
 				{
 					document.insertString(document.getLength(), time+"\r\n", infoAttributeSet);
@@ -269,6 +269,7 @@ public class Client extends JFrame
 		JScrollPane scrollPane_OnlineUserList = new JScrollPane();
 		scrollPane_OnlineUserList.setAutoscrolls(true);
 		scrollPane_OnlineUserList.setBounds(630, 25, 208, 281);
+		scrollPane_OnlineUserList.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 		contentPane.add(scrollPane_OnlineUserList);
 		
 		list_UserList = new JList<>();
@@ -277,10 +278,12 @@ public class Client extends JFrame
 		JScrollPane scrollPane_Message = new JScrollPane();
 		scrollPane_Message.setAutoscrolls(true);
 		scrollPane_Message.setBounds(0, 25, 622, 446);
+		scrollPane_Message.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 		contentPane.add(scrollPane_Message);
 		
 		textPane = new JTextPane();
 		textPane.setEditable(false);
+		textPane.setAutoscrolls(true);
 		scrollPane_Message.setViewportView(textPane);
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -336,11 +339,11 @@ public class Client extends JFrame
 		
 		Component horizontalStrut = Box.createHorizontalStrut(180);
 		toolBar.add(horizontalStrut);
-
+		
 		btn_Config = new JButton("");
 		btn_Config.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/setting.png")));
 		toolBar.add(btn_Config);
-
+		
 		popupMenu = new JPopupMenu();
 		
 		mntmShowRecoord = new JMenuItem("Show Message Record");
@@ -382,6 +385,7 @@ public class Client extends JFrame
 		JScrollPane scrollPane_Friends = new JScrollPane();
 		scrollPane_Friends.setAutoscrolls(true);
 		scrollPane_Friends.setBounds(630, 334, 208, 233);
+		scrollPane_Friends.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 		contentPane.add(scrollPane_Friends);
 		
 		list_Friends = new JList<>();
@@ -450,6 +454,8 @@ public class Client extends JFrame
 			@Override
 			public void actionPerformed(ActionEvent e) 
 			{
+				printWriter.println("#Update Color");
+				printWriter.println(color.getRGB());
 				printWriter.println("#Update Font");
 				printWriter.println(fontName);
 				printWriter.println(fontStyle);
@@ -785,8 +791,8 @@ public class Client extends JFrame
 			public void actionPerformed(ActionEvent e) 
 			{
 				JColorChooser jColorChooser=new JColorChooser(Color.BLACK);
-				Color customColor=jColorChooser.showDialog(null, "Set text color", Color.BLACK);
-				textField.setForeground(customColor);
+				color=jColorChooser.showDialog(null, "Set text color", Color.BLACK);
+				textField.setForeground(color);
 			}
 		});
 	}
@@ -981,6 +987,9 @@ public class Client extends JFrame
 						fontStyle=Integer.parseInt(bufferedReader.readLine());
 						fontSize=Integer.parseInt(bufferedReader.readLine());
 						font=new Font(fontName, fontStyle, fontSize);
+						int rgb=Integer.parseInt(bufferedReader.readLine());
+						color=new Color(rgb);
+						textField.setForeground(color);
 						textField.setFont(font);
 						switch (fontSize)
 						{

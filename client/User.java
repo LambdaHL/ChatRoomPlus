@@ -1,5 +1,6 @@
 package client;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
 import java.net.Socket;
@@ -17,8 +18,9 @@ public class User
 	public Font font;
 	public String fontName;
 	public int fontStyle,fontSize;
+	public Color color;
 	
-	public User(String name, String nickName, String icon, String ip, Socket socket, String fontName, int fontStyle,int fontSize)
+	public User(String name, String nickName, String icon, String ip, Socket socket, String fontName, int fontStyle,int fontSize, Color color)
 	{
 		this.name=name;
 		this.nickName=nickName;
@@ -28,6 +30,7 @@ public class User
 		this.fontName=fontName;
 		this.fontStyle=fontStyle;
 		this.fontSize=fontSize;
+		this.color=color;
 		font=new Font(fontName,fontStyle,fontSize);
 		try
 		{

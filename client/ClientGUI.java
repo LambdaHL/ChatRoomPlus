@@ -45,6 +45,7 @@ public class ClientGUI extends JFrame {
 		contentPane.setLayout(null);
 		
 		JScrollPane scrollPane_OnlineUserList = new JScrollPane();
+		scrollPane_OnlineUserList.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 		scrollPane_OnlineUserList.setAutoscrolls(true);
 		scrollPane_OnlineUserList.setBounds(630, 25, 208, 281);
 		contentPane.add(scrollPane_OnlineUserList);
@@ -54,6 +55,7 @@ public class ClientGUI extends JFrame {
 		scrollPane_OnlineUserList.setViewportView(list_UserList);
 		
 		JScrollPane scrollPane_Message = new JScrollPane();
+		scrollPane_Message.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 		scrollPane_Message.setAutoscrolls(true);
 		scrollPane_Message.setBounds(0, 25, 622, 446);
 		contentPane.add(scrollPane_Message);
@@ -157,6 +159,7 @@ public class ClientGUI extends JFrame {
 		contentPane.add(btn_Enter);
 		
 		JScrollPane scrollPane_Friends = new JScrollPane();
+		scrollPane_Friends.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 		scrollPane_Friends.setAutoscrolls(true);
 		scrollPane_Friends.setBounds(630, 334, 208, 233);
 		contentPane.add(scrollPane_Friends);

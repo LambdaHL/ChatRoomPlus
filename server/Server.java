@@ -2,6 +2,8 @@ package server;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
@@ -60,6 +62,7 @@ public class Server extends JFrame
 		scrollPane_TextArea = new JScrollPane();
 		scrollPane_TextArea.setBounds(378, 10, 361, 489);
 		scrollPane_TextArea.setAutoscrolls(true);
+		scrollPane_TextArea.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 		contentPane.add(scrollPane_TextArea);
 		
 		textArea_Conversation = new JTextArea();
@@ -133,6 +136,7 @@ public class Server extends JFrame
 		private User user;
 		private Font font;
 		private String fontName;
+		private Color color;
 		private int fontStyle,fontSize;
 		
 		@Override
@@ -196,6 +200,8 @@ public class Server extends JFrame
 										this.fontName=dbOperator.getFontName(userName);
 										this.fontStyle=dbOperator.getFontStyle(userName);
 										this.fontSize=dbOperator.getFontSize(userName);
+										int rgb=dbOperator.getColor(userName);
+										this.color=new Color(rgb);
 										icon=dbOperator.getUserIcon(userName);
 										printWriter.println(this.userName);
 										printWriter.println(this.userNickName);
@@ -203,10 +209,10 @@ public class Server extends JFrame
 										printWriter.println(this.fontName);
 										printWriter.println(this.fontStyle);
 										printWriter.println(this.fontSize);
+										printWriter.println(rgb);
 										printWriter.flush();
 										userList.add(this.getUser());
 										this.user=this.getUser();
-										
 										updateUserList();
 										break;
 									}
@@ -343,6 +349,21 @@ public class Server extends JFrame
 							dbOperator.updateFont(userName, fontName, fontStyle, fontSize);
 							continue;
 						}
+						
+						if(string.equals("#Update Color"))
+						{
+							int rgb=Integer.parseInt(bufferedReader.readLine());
+							color=new Color(rgb);
+							for(int i=0;i<userList.size();i++)
+							{
+								if(userList.get(i).name.equals(userName))
+								{
+									userList.get(i).color=color;
+								}
+							}
+							dbOperator.setColor(userName, rgb);
+							continue;
+						}
 					}
 				}
 			}
@@ -381,26 +402,6 @@ public class Server extends JFrame
 			this.start();
 		}
 
-		public String getUserName()
-		{
-			return userName;
-		}
-
-		public String getUserNickName()
-		{
-			return userNickName;
-		}
-
-		public String getIcon()
-		{
-			return icon;
-		}
-
-		public Socket getSocket()
-		{
-			return socket;
-		}
-
 		public boolean isLogged()
 		{
 			return isLogged;
@@ -408,7 +409,7 @@ public class Server extends JFrame
 
 		public User getUser()
 		{
-			User user=new User(userName, userNickName, icon, socket.getInetAddress().toString()+":"+socket.getPort(), socket, fontName, fontStyle, fontSize);
+			User user=new User(userName, userNickName, icon, socket.getInetAddress().toString()+":"+socket.getPort(), socket, fontName, fontStyle, fontSize, color);
 			return user;
 		}
 		
@@ -439,6 +440,7 @@ public class Server extends JFrame
 						pWriter.println(userList.get(i).fontName);
 						pWriter.println(userList.get(i).fontStyle);
 						pWriter.println(userList.get(i).fontSize);
+						pWriter.println(userList.get(i).color.getRGB());
 					}
 					pWriter.flush();
 				}

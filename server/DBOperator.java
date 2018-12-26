@@ -36,7 +36,7 @@ public class DBOperator
     {
         try
         {
-            String sql="INSERT INTO User(username,usernickname,password,icon,logstatus,fontname,fontsize,fontstyle) VALUES(?,?,?,?,0,?,14,0)";
+            String sql="INSERT INTO User(username,usernickname,password,icon,logstatus,fontname,fontsize,fontstyle) VALUES(?,?,?,?,0,?,14,0,-16777216)";
             preparedStatement=connection.prepareStatement(sql);
             preparedStatement.setString(1, userName);
             preparedStatement.setString(2, userNickName);
@@ -402,6 +402,42 @@ public class DBOperator
     		e.printStackTrace();
     	}
     	return 0;
+    }
+    
+    public int getColor(String userName)
+    {
+    	try 
+    	{
+    		String sql="SELECT color FROM User WHERE username=?";
+    		preparedStatement=connection.prepareStatement(sql);
+    		preparedStatement.setString(1, userName);
+    		preparedStatement.executeQuery();
+    		ResultSet resultSet=preparedStatement.getResultSet();
+    		resultSet.next();
+    		int rgb=resultSet.getInt(1);
+    		return rgb;
+    	}
+    	catch (Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    	return 0;
+    }
+    
+    public void setColor(String userName,int rgb)
+    {
+    	try
+    	{
+    		String sql="UPDATE User SET color=? WHERE username=?";
+    		preparedStatement=connection.prepareStatement(sql);
+    		preparedStatement.setInt(1, rgb);
+    		preparedStatement.setString(2, userName);
+    		preparedStatement.executeUpdate();
+    	}
+    	catch (Exception e)
+    	{
+    		e.printStackTrace();
+    	}
     }
     
     public void reset()
