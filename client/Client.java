@@ -128,7 +128,7 @@ public class Client extends JFrame
 								String time=bufferedReader.readLine();
 								String source=bufferedReader.readLine();
 								String message=bufferedReader.readLine();
-
+								
 								//Unfinished:new private chat frame
 
 								continue;
@@ -257,7 +257,7 @@ public class Client extends JFrame
 		{
 			e.printStackTrace();
 		}
-		setTitle("CharRoomPlus");
+		setTitle("ChatRoomPlus");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 855, 607);

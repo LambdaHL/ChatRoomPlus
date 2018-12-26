@@ -35,7 +35,7 @@ public class ClientGUI extends JFrame {
 	 * Create the frame.
 	 */
 	public ClientGUI() {
-		setTitle("CharRoomPlus");
+		setTitle("ChatRoomPlus");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 855, 607);
