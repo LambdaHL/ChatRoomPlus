@@ -96,19 +96,20 @@ public class Client extends JFrame
 							if(string.equals("#Update List"))
 							{
 								int size=Integer.parseInt(bufferedReader.readLine());
-								userList=new ArrayList<User>();
 								userList.clear();
 								for(int i=0;i<size;i++)
 								{
 									String name=bufferedReader.readLine();
 									String nickName=bufferedReader.readLine();
-									String iconFile=bufferedReader.readLine();
+									String icon=bufferedReader.readLine();
 									String fontName=bufferedReader.readLine();
 									int fontStyle=Integer.parseInt(bufferedReader.readLine());
 									int fontSize=Integer.parseInt(bufferedReader.readLine());
-									User user=new User(name, nickName, iconFile, null, null, fontName, fontStyle, fontSize);
+									User user=new User(name, nickName, icon, null, null, fontName, fontStyle, fontSize);
 									userList.add(user);
 								}
+								if(size==0)
+									userList=new ArrayList<>();
 								list_UserList.setModel(new MyListModel<Object>(userList));
 								list_UserList.setCellRenderer(new MyListCellRenderer());
 								continue;
@@ -1024,7 +1025,6 @@ public class Client extends JFrame
 							}
 							case Font.BOLD:
 							{
-								System.out.println(Font.BOLD);
 								tglbtn_Bold.setSelected(true);
 								break;
 							}

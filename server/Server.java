@@ -439,8 +439,8 @@ public class Server extends JFrame
 						pWriter.println(userList.get(i).fontName);
 						pWriter.println(userList.get(i).fontStyle);
 						pWriter.println(userList.get(i).fontSize);
-						pWriter.flush();
 					}
+					pWriter.flush();
 				}
 			}
 			catch (Exception e)
