@@ -266,9 +266,9 @@ public class Server extends JFrame
 							textArea_Conversation.append(time+"\r\n");
 							textArea_Conversation.append(source+"\r\n");
 							textArea_Conversation.append(message+"\r\n");
+							textArea_Conversation.append("\r\n");
+							updateUserList();
 							sendToAll(time, source, message);
-							//Unfinished:textpane
-							
 							continue;
 						}
 						
@@ -278,6 +278,7 @@ public class Server extends JFrame
 							String source=bufferedReader.readLine();
 							String target=bufferedReader.readLine();
 							String message=bufferedReader.readLine();
+							updateUserList();
 							sendTo(time, source, target, message);
 							//Unfinished:private chat
 							
@@ -329,6 +330,16 @@ public class Server extends JFrame
 							fontName=bufferedReader.readLine();
 							fontStyle=Integer.parseInt(bufferedReader.readLine());
 							fontSize=Integer.parseInt(bufferedReader.readLine());
+							for(int i=0;i<userList.size();i++)
+							{
+								if(userList.get(i).name.equals(userName))
+								{
+									userList.get(i).fontName=fontName;
+									userList.get(i).fontStyle=fontStyle;
+									userList.get(i).fontSize=fontSize;
+									userList.get(i).font=new Font(fontName,fontStyle,fontSize);
+								}
+							}
 							dbOperator.updateFont(userName, fontName, fontStyle, fontSize);
 							continue;
 						}

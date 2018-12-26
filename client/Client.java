@@ -8,6 +8,11 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.Document;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.io.*;
@@ -36,11 +41,13 @@ public class Client extends JFrame
 	private JMenuItem mntmChangePassword, mntmShowRecoord, mntmChangeNickName;
 	private JMenu mnChangeIcon;
 	private JMenuItem mntmChangeIcon0,mntmChangeIcon1,mntmChangeIcon2,mntmChangeIcon3,mntmChangeIcon4,mntmChangeIcon5;
+	private ArrayList<User> userList;
 	
 	public Client()
 	{
 		createLogPad();
 		createClientGUI();
+		userList=new ArrayList<>();
 		new ConnectToServerThread().start();
 	}
 	
@@ -89,7 +96,8 @@ public class Client extends JFrame
 							if(string.equals("#Update List"))
 							{
 								int size=Integer.parseInt(bufferedReader.readLine());
-								ArrayList<User> userList=new ArrayList<User>();
+								userList=new ArrayList<User>();
+								userList.clear();
 								for(int i=0;i<size;i++)
 								{
 									String name=bufferedReader.readLine();
@@ -111,11 +119,7 @@ public class Client extends JFrame
 								String time=bufferedReader.readLine();
 								String source=bufferedReader.readLine();
 								String message=bufferedReader.readLine();
-								System.out.println(time);
-								System.out.println(source);
-								System.out.println(message);
-								//Unfinished:textpane
-
+								insert(time, source, message);
 								continue;
 							}
 
@@ -131,6 +135,107 @@ public class Client extends JFrame
 							}
 						}
 					}
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	private void insert(String time,String source,String message) 
+	{
+		SimpleAttributeSet simpleAttributeSet=new SimpleAttributeSet();
+		SimpleAttributeSet infoAttributeSet=new SimpleAttributeSet();
+		StyleConstants.setFontFamily(infoAttributeSet, "Consolas");
+		Document document=textPane.getDocument();
+		if(source.equals(userName))
+		{
+			StyleConstants.setFontFamily(simpleAttributeSet, fontName);
+			StyleConstants.setFontSize(simpleAttributeSet, fontSize);
+			switch (fontStyle)
+			{
+				case Font.PLAIN:
+				{
+					StyleConstants.setBold(simpleAttributeSet, false);
+					StyleConstants.setItalic(simpleAttributeSet, false);
+					break;
+				}
+				case Font.BOLD:
+				{
+					StyleConstants.setBold(simpleAttributeSet, true);
+					StyleConstants.setItalic(simpleAttributeSet, false);
+					break;
+				}
+				case Font.ITALIC:
+				{
+					StyleConstants.setBold(simpleAttributeSet, false);
+					StyleConstants.setItalic(simpleAttributeSet, true);
+					break;
+				}
+				case Font.BOLD+Font.ITALIC:
+				{
+					StyleConstants.setBold(simpleAttributeSet, true);
+					StyleConstants.setItalic(simpleAttributeSet, true);
+					break;
+				}
+			}
+			//StyleConstants.setForeground(simpleAttributeSet, fg);
+			try
+			{
+				document.insertString(document.getLength(), time+"\r\n", infoAttributeSet);
+				document.insertString(document.getLength(), source+"\r\n", infoAttributeSet);
+				document.insertString(document.getLength(), message+"\r\n", simpleAttributeSet);
+				document.insertString(document.getLength(), "\r\n", infoAttributeSet);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			return;
+		}
+		for(int i=0;i<userList.size();i++)
+		{
+			if(userList.get(i).name.equals(source))
+			{
+				StyleConstants.setFontFamily(simpleAttributeSet, userList.get(i).fontName);
+				StyleConstants.setFontSize(simpleAttributeSet, userList.get(i).fontSize);
+				StyleConstants.setFontFamily(infoAttributeSet, "Consolas");
+				switch (userList.get(i).fontStyle)
+				{
+					case Font.PLAIN:
+					{
+						StyleConstants.setBold(simpleAttributeSet, false);
+						StyleConstants.setItalic(simpleAttributeSet, false);
+						break;
+					}
+					case Font.BOLD:
+					{
+						StyleConstants.setBold(simpleAttributeSet, true);
+						StyleConstants.setItalic(simpleAttributeSet, false);
+						break;
+					}
+					case Font.ITALIC:
+					{
+						StyleConstants.setBold(simpleAttributeSet, false);
+						StyleConstants.setItalic(simpleAttributeSet, true);
+						break;
+					}
+					case Font.BOLD+Font.ITALIC:
+					{
+						StyleConstants.setBold(simpleAttributeSet, true);
+						StyleConstants.setItalic(simpleAttributeSet, true);
+						break;
+					}
+				}
+				//StyleConstants.setForeground(simpleAttributeSet, fg);
+				try
+				{
+					document.insertString(document.getLength(), time+"\r\n", infoAttributeSet);
+					document.insertString(document.getLength(), source+"\r\n", infoAttributeSet);
+					document.insertString(document.getLength(), message+"\r\n", simpleAttributeSet);
+					document.insertString(document.getLength(), "\r\n", infoAttributeSet);
 				}
 				catch (Exception e)
 				{
@@ -204,7 +309,7 @@ public class Client extends JFrame
 		contentPane.add(tglbtn_Italic);
 		
 		comboBox_FontName = new JComboBox();
-		comboBox_FontName.setModel(new DefaultComboBoxModel(new String[] {"Microsoft YaHei", "Consola", "Courier New"}));
+		comboBox_FontName.setModel(new DefaultComboBoxModel(new String[] {"Microsoft YaHei", "Consolas", "Courier New"}));
 		comboBox_FontName.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
 		comboBox_FontName.setMaximumRowCount(3);
 		toolBar.add(comboBox_FontName);
@@ -598,10 +703,10 @@ public class Client extends JFrame
 							textField.setFont(font);
 							break;
 						}
-						case 1://Consola
+						case 1://Consolas
 						{
-							font=new Font("Consola",font.getStyle(),font.getSize());
-							fontName="Consola";
+							font=new Font("Consolas",font.getStyle(),font.getSize());
+							fontName="Consolas";
 							textField.setFont(font);
 							break;
 						}
