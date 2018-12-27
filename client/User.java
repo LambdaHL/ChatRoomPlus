@@ -13,20 +13,16 @@ public class User
 	public String icon;
 	public Image image;
 	public ImageIcon imageIcon;
-	public String ip;
-	public Socket socket;
 	public Font font;
 	public String fontName;
 	public int fontStyle,fontSize;
 	public Color color;
 	
-	public User(String name, String nickName, String icon, String ip, Socket socket, String fontName, int fontStyle,int fontSize, Color color)
+	public User(String name, String nickName, String icon, String fontName, int fontStyle, int fontSize, Color color)
 	{
 		this.name=name;
 		this.nickName=nickName;
 		this.icon=icon;
-		this.ip=ip;
-		this.socket=socket;
 		this.fontName=fontName;
 		this.fontStyle=fontStyle;
 		this.fontSize=fontSize;

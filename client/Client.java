@@ -26,7 +26,7 @@ public class Client extends JFrame
 	private JToggleButton tglbtn_Bold, tglbtn_Italic;
 	private JButton btn_Register, btn_Login;
 	private JComboBox comboBox_FontName, comboBox_FontSize;
-	private JButton btn_Config, btn_Enter, btn_Color, btn_AddFriend, btn_DeleteFriend, btn_SendFile;
+	private JButton btn_Config, btn_Enter, btn_Color, btn_AddFriend, btn_DeleteFriend;
 	private JFrame logpad;
 	private String userName,userNickName,password,icon,fontName;
 	private int fontStyle,fontSize;
@@ -104,7 +104,7 @@ public class Client extends JFrame
 									int fontSize=Integer.parseInt(bufferedReader.readLine());
 									int rgb=Integer.parseInt(bufferedReader.readLine());
 									Color color=new Color(rgb);
-									User user=new User(name, nickName, icon, null, null, fontName, fontStyle, fontSize, color);
+									User user=new User(name, nickName, icon, fontName, fontStyle, fontSize, color);
 									userList.add(user);
 								}
 								if(size==0)
@@ -246,6 +246,302 @@ public class Client extends JFrame
 		}
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void createPrivateChat()
+	{
+		try 
+		{
+			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		JFrame pFrame=new JFrame("ChatRoomPlus");
+		pFrame.setResizable(false);
+		pFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		pFrame.setBounds(100, 100, 451, 574);
+		JPanel contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JTextField textField = new JTextField();
+		textField.setBounds(0, 465, 385, 68);
+		contentPane.add(textField);
+		textField.setColumns(10);
+		
+		JButton btn_Enter = new JButton("");
+		btn_Enter.setIcon(new ImageIcon(PrivateChatGUI.class.getResource("/client/Icons/enter.png")));
+		btn_Enter.setBounds(386, 465, 49, 68);
+		contentPane.add(btn_Enter);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setAutoscrolls(true);
+		scrollPane.setBounds(0, 56, 435, 368);
+		contentPane.add(scrollPane);
+		
+		JTextPane textPane = new JTextPane();
+		scrollPane.setViewportView(textPane);
+		textPane.setEditable(false);
+		
+		JLabel label_Me = new JLabel("");
+		label_Me.setBounds(0, 0, 435, 25);
+		contentPane.add(label_Me);
+		
+		JLabel label_Source = new JLabel("");
+		label_Source.setBounds(0, 29, 435, 25);
+		contentPane.add(label_Source);
+		
+		JToggleButton tglbtn_Bold = new JToggleButton("");
+		tglbtn_Bold.setIcon(new ImageIcon(PrivateChatGUI.class.getResource("/client/Icons/bold.png")));
+		tglbtn_Bold.setBounds(0, 427, 39, 35);
+		contentPane.add(tglbtn_Bold);
+		
+		JToggleButton tglbtn_Italic = new JToggleButton("");
+		tglbtn_Italic.setIcon(new ImageIcon(PrivateChatGUI.class.getResource("/client/Icons/italic.png")));
+		tglbtn_Italic.setBounds(39, 427, 39, 35);
+		contentPane.add(tglbtn_Italic);
+		
+		JComboBox comboBox_Font = new JComboBox();
+		comboBox_Font.setModel(new DefaultComboBoxModel(new String[] {"微软雅黑", "Consola", "Courier New"}));
+		comboBox_Font.setMaximumRowCount(3);
+		comboBox_Font.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
+		comboBox_Font.setBounds(88, 427, 145, 35);
+		contentPane.add(comboBox_Font);
+		
+		JComboBox comboBox_Size = new JComboBox();
+		comboBox_Size.setModel(new DefaultComboBoxModel(new String[] {"14", "16", "18", "20", "22", "24"}));
+		comboBox_Size.setFont(new Font("Courier New", Font.PLAIN, 18));
+		comboBox_Size.setBounds(243, 427, 93, 35);
+		contentPane.add(comboBox_Size);
+		
+		JButton button_Color = new JButton("");
+		button_Color.setIcon(new ImageIcon(PrivateChatGUI.class.getResource("/client/Icons/color.png")));
+		button_Color.setBounds(346, 427, 39, 35);
+		contentPane.add(button_Color);
+		
+		JButton button_SendFile = new JButton("");
+		button_SendFile.setIcon(new ImageIcon(PrivateChatGUI.class.getResource("/client/Icons/file.png")));
+		button_SendFile.setBounds(386, 427, 49, 35);
+		contentPane.add(button_SendFile);
+		
+		tglbtn_Bold.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				if(tglbtn_Bold.isSelected())
+				{
+					if(tglbtn_Italic.isSelected())
+					{
+						font=new Font(fontName,Font.BOLD+Font.ITALIC,font.getSize());
+						fontStyle=Font.BOLD+Font.ITALIC;
+						textField.setFont(font);
+						Client.this.tglbtn_Bold.setSelected(true);
+						Client.this.tglbtn_Italic.setSelected(true);
+					}
+					else
+					{
+						font=new Font(fontName,Font.BOLD,font.getSize());
+						fontStyle=Font.BOLD;
+						textField.setFont(font);
+						Client.this.tglbtn_Bold.setSelected(true);
+						Client.this.tglbtn_Italic.setSelected(false);
+					}
+				}
+				else
+				{
+					if(tglbtn_Italic.isSelected())
+					{
+						font=new Font(fontName,Font.ITALIC,font.getSize());
+						fontStyle=Font.ITALIC;
+						textField.setFont(font);
+						Client.this.tglbtn_Bold.setSelected(false);
+						Client.this.tglbtn_Italic.setSelected(true);
+					}
+					else
+					{
+						font=new Font(fontName,Font.PLAIN,font.getSize());
+						fontStyle=Font.PLAIN;
+						textField.setFont(font);
+						Client.this.tglbtn_Bold.setSelected(false);
+						Client.this.tglbtn_Italic.setSelected(false);
+					}
+				}
+			}
+		});
+		
+		tglbtn_Italic.addActionListener(new ActionListener()
+		{	
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				if(tglbtn_Bold.isSelected())
+				{
+					if(tglbtn_Italic.isSelected())
+					{
+						font=new Font(fontName,Font.BOLD+Font.ITALIC,font.getSize());
+						fontStyle=Font.BOLD+Font.ITALIC;
+						textField.setFont(font);
+						Client.this.tglbtn_Bold.setSelected(true);
+						Client.this.tglbtn_Italic.setSelected(true);
+					}
+					else
+					{
+						font=new Font(fontName,Font.BOLD,font.getSize());
+						fontStyle=Font.BOLD;
+						textField.setFont(font);
+						Client.this.tglbtn_Bold.setSelected(true);
+						Client.this.tglbtn_Italic.setSelected(false);
+					}
+				}
+				else
+				{
+					if(tglbtn_Italic.isSelected())
+					{
+						font=new Font(fontName,Font.ITALIC,font.getSize());
+						fontStyle=Font.ITALIC;
+						textField.setFont(font);
+						Client.this.tglbtn_Bold.setSelected(false);
+						Client.this.tglbtn_Italic.setSelected(true);
+					}
+					else
+					{
+						font=new Font(fontName,Font.PLAIN,font.getSize());
+						fontStyle=Font.PLAIN;
+						textField.setFont(font);
+						Client.this.tglbtn_Bold.setSelected(false);
+						Client.this.tglbtn_Italic.setSelected(false);
+					}
+				}
+			}
+		});
+		
+		button_Color.addActionListener(new ActionListener()
+		{			
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				JColorChooser jColorChooser=new JColorChooser(Color.BLACK);
+				color=jColorChooser.showDialog(null, "Set text color", Color.BLACK);
+				textField.setForeground(color);
+				Client.this.textField.setForeground(color);
+			}
+		});
+		
+		comboBox_Font.addItemListener(new ItemListener()
+		{
+			@Override
+			public void itemStateChanged(ItemEvent e) 
+			{
+				if(e.getStateChange()==ItemEvent.SELECTED)
+				{
+					switch (comboBox_FontName.getSelectedIndex())
+					{
+						case 0://Microsoft YaHei
+						{
+							font=new Font("Microsoft YaHei",font.getStyle(),font.getSize());
+							fontName="Microsoft YaHei";
+							textField.setFont(font);
+							comboBox_FontName.setSelectedIndex(comboBox_Font.getSelectedIndex());
+							Client.this.textField.setFont(font);
+							break;
+						}
+						case 1://Consolas
+						{
+							font=new Font("Consolas",font.getStyle(),font.getSize());
+							fontName="Consolas";
+							textField.setFont(font);
+							comboBox_FontName.setSelectedIndex(comboBox_Font.getSelectedIndex());
+							Client.this.textField.setFont(font);
+							break;
+						}
+						case 2://Courier New
+						{
+							font=new Font("Courier New",font.getStyle(),font.getSize());
+							fontName="Courier New";
+							textField.setFont(font);
+							comboBox_FontName.setSelectedIndex(comboBox_Font.getSelectedIndex());
+							Client.this.textField.setFont(font);
+							break;
+						}
+					}
+				}
+			}
+		});
+		
+		comboBox_Size.addItemListener(new ItemListener()
+		{
+			@Override
+			public void itemStateChanged(ItemEvent e) 
+			{
+				if(e.getStateChange()==ItemEvent.SELECTED)
+				{
+					switch (comboBox_FontSize.getSelectedIndex())
+					{
+						case 0://14
+						{
+							font=new Font(font.getFontName(), font.getStyle(), 14);
+							fontSize=14;
+							textField.setFont(font);
+							comboBox_FontSize.setSelectedIndex(comboBox_Size.getSelectedIndex());
+							Client.this.textField.setFont(font);
+							break;
+						}
+						case 1://16
+						{
+							font=new Font(font.getFontName(), font.getStyle(), 16);
+							fontSize=16;
+							textField.setFont(font);
+							comboBox_FontSize.setSelectedIndex(comboBox_Size.getSelectedIndex());
+							Client.this.textField.setFont(font);
+							break;
+						}
+						case 2://18
+						{
+							font=new Font(font.getFontName(), font.getStyle(), 18);
+							fontSize=18;
+							textField.setFont(font);
+							comboBox_FontSize.setSelectedIndex(comboBox_Size.getSelectedIndex());
+							Client.this.textField.setFont(font);
+							break;
+						}
+						case 3://20
+						{
+							font=new Font(font.getFontName(), font.getStyle(), 20);
+							fontSize=20;
+							textField.setFont(font);
+							comboBox_FontSize.setSelectedIndex(comboBox_Size.getSelectedIndex());
+							Client.this.textField.setFont(font);
+							break;
+						}
+						case 4://22
+						{
+							font=new Font(font.getFontName(), font.getStyle(), 22);
+							fontSize=22;
+							textField.setFont(font);
+							comboBox_FontSize.setSelectedIndex(comboBox_Size.getSelectedIndex());
+							Client.this.textField.setFont(font);
+							break;
+						}
+						case 5://24
+						{
+							font=new Font(font.getFontName(), font.getStyle(), 24);
+							fontSize=24;
+							textField.setFont(font);
+							comboBox_FontSize.setSelectedIndex(comboBox_Size.getSelectedIndex());
+							Client.this.textField.setFont(font);
+							break;
+						}
+					}
+				}
+			}
+		});
+		
+		
+	}
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void createClientGUI()
 	{
@@ -332,10 +628,6 @@ public class Client extends JFrame
 		btn_Color = new JButton("");
 		btn_Color.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/color.png")));
 		toolBar.add(btn_Color);
-		
-		btn_SendFile = new JButton("");
-		btn_SendFile.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/file.png")));
-		toolBar.add(btn_SendFile);
 		
 		Component horizontalStrut = Box.createHorizontalStrut(180);
 		toolBar.add(horizontalStrut);
@@ -793,6 +1085,7 @@ public class Client extends JFrame
 				JColorChooser jColorChooser=new JColorChooser(Color.BLACK);
 				color=jColorChooser.showDialog(null, "Set text color", Color.BLACK);
 				textField.setForeground(color);
+				//cascade change all private chat frame
 			}
 		});
 	}
