@@ -11,6 +11,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import java.util.ArrayList;
 import java.util.Date;
 import java.io.*;
@@ -170,6 +171,8 @@ public class Client extends JFrame
 		SimpleAttributeSet simpleAttributeSet=new SimpleAttributeSet();
 		SimpleAttributeSet infoAttributeSet=new SimpleAttributeSet();
 		StyleConstants.setFontFamily(infoAttributeSet, "Consolas");
+		StyleConstants.setAlignment(infoAttributeSet, StyleConstants.ALIGN_RIGHT);
+		StyleConstants.setAlignment(simpleAttributeSet, StyleConstants.ALIGN_RIGHT);
 		Document document=textPane.getDocument();
 		if(source.equals(userName))
 		{
@@ -205,10 +208,19 @@ public class Client extends JFrame
 			StyleConstants.setForeground(simpleAttributeSet, color);
 			try
 			{
-				document.insertString(document.getLength(), time+"\r\n", infoAttributeSet);
-				document.insertString(document.getLength(), source+"\r\n", infoAttributeSet);
-				document.insertString(document.getLength(), message+"\r\n", simpleAttributeSet);
-				document.insertString(document.getLength(), "\r\n", infoAttributeSet);
+				int length=document.getLength();
+				StyledDocument styledDocument=textPane.getStyledDocument();
+				document.insertString(length, time+"\r\n", infoAttributeSet);
+				styledDocument.setParagraphAttributes(length, document.getLength(), infoAttributeSet, true);
+				length=document.getLength();
+				document.insertString(length, source+"\r\n", infoAttributeSet);
+				styledDocument.setParagraphAttributes(length, document.getLength(), infoAttributeSet, true);
+				length=document.getLength();				
+				document.insertString(length, message+"\r\n", simpleAttributeSet);
+				styledDocument.setParagraphAttributes(length, document.getLength(), simpleAttributeSet, false);
+				length=document.getLength();
+				document.insertString(length, "\r\n", infoAttributeSet);
+				styledDocument.setParagraphAttributes(length, document.getLength(), infoAttributeSet, true);
 				textPane.setCaretPosition(textPane.getDocument().getLength());
 			}
 			catch (Exception e)
@@ -217,6 +229,8 @@ public class Client extends JFrame
 			}
 			return;
 		}
+		StyleConstants.setAlignment(infoAttributeSet, StyleConstants.ALIGN_LEFT);
+		StyleConstants.setAlignment(simpleAttributeSet, StyleConstants.ALIGN_LEFT);
 		for(int i=0;i<userList.size();i++)
 		{
 			if(userList.get(i).name.equals(source))
@@ -254,10 +268,19 @@ public class Client extends JFrame
 				StyleConstants.setForeground(simpleAttributeSet, userList.get(i).color);
 				try
 				{
-					document.insertString(document.getLength(), time+"\r\n", infoAttributeSet);
-					document.insertString(document.getLength(), source+"\r\n", infoAttributeSet);
-					document.insertString(document.getLength(), message+"\r\n", simpleAttributeSet);
-					document.insertString(document.getLength(), "\r\n", infoAttributeSet);
+					int length=document.getLength();
+					StyledDocument styledDocument=textPane.getStyledDocument();
+					document.insertString(length, time+"\r\n", infoAttributeSet);
+					styledDocument.setParagraphAttributes(length, document.getLength(), infoAttributeSet, true);
+					length=document.getLength();
+					document.insertString(length, source+"\r\n", infoAttributeSet);
+					styledDocument.setParagraphAttributes(length, document.getLength(), infoAttributeSet, true);
+					length=document.getLength();				
+					document.insertString(length, message+"\r\n", simpleAttributeSet);
+					styledDocument.setParagraphAttributes(length, document.getLength(), simpleAttributeSet, false);
+					length=document.getLength();
+					document.insertString(length, "\r\n", infoAttributeSet);
+					styledDocument.setParagraphAttributes(length, document.getLength(), infoAttributeSet, true);
 				}
 				catch (Exception e)
 				{
@@ -278,6 +301,88 @@ public class Client extends JFrame
 		private JTextPane textPane;
 		private JTextField textField;
 		String targetName;
+		
+		private void updateFontBar()
+		{
+			textField.setForeground(color);
+			textField.setFont(font);
+			switch (fontSize)
+			{
+				case 14:
+				{
+					comboBox_Size.setSelectedIndex(0);
+					break;
+				}
+				case 16:
+				{
+					comboBox_Size.setSelectedIndex(1);
+					break;
+				}
+				case 18:
+				{
+					comboBox_Size.setSelectedIndex(2);
+					break;
+				}
+				case 20:
+				{
+					comboBox_Size.setSelectedIndex(3);
+					break;
+				}
+				case 22:
+				{
+					comboBox_Size.setSelectedIndex(4);
+					break;
+				}
+				case 24:
+				{
+					comboBox_Size.setSelectedIndex(5);
+					break;
+				}
+			}
+			switch (fontStyle)
+			{
+				case Font.PLAIN:
+				{
+					tglbtn_Bold.setSelected(false);
+					tglbtn_Italic.setSelected(false);
+					break;
+				}
+				case Font.BOLD:
+				{
+					tglbtn_Bold.setSelected(true);
+					break;
+				}
+				case Font.ITALIC:
+				{
+					tglbtn_Italic.setSelected(true);
+					break;
+				}
+				case Font.BOLD+Font.ITALIC:
+				{
+					tglbtn_Bold.setSelected(true);
+					tglbtn_Italic.setSelected(true);
+					break;
+				}
+			}
+			switch (fontName)
+			{
+				case "Microsoft YaHei":
+				{
+					comboBox_Font.setSelectedIndex(0);
+					break;
+				}
+				case "Consolas":
+				{
+					comboBox_Font.setSelectedIndex(1);
+					break;
+				}
+				case "Courier New":
+				{
+					comboBox_Font.setSelectedIndex(2);
+					break;
+				}
+			}
+		}
 		
 		public void setFontBold()
 		{
@@ -304,8 +409,9 @@ public class Client extends JFrame
 			SimpleAttributeSet simpleAttributeSet=new SimpleAttributeSet();
 			SimpleAttributeSet infoAttributeSet=new SimpleAttributeSet();
 			StyleConstants.setFontFamily(infoAttributeSet, "Consolas");
+			StyleConstants.setAlignment(infoAttributeSet, StyleConstants.ALIGN_RIGHT);
+			StyleConstants.setAlignment(simpleAttributeSet, StyleConstants.ALIGN_RIGHT);
 			Document document=textPane.getDocument();
-			System.out.println("R");
 			if(source.equals(userName))
 			{
 				StyleConstants.setFontFamily(simpleAttributeSet, fontName);
@@ -340,25 +446,35 @@ public class Client extends JFrame
 				StyleConstants.setForeground(simpleAttributeSet, color);
 				try
 				{
-					document.insertString(document.getLength(), time+"\r\n", infoAttributeSet);
-					document.insertString(document.getLength(), source+"\r\n", infoAttributeSet);
-					document.insertString(document.getLength(), message+"\r\n", simpleAttributeSet);
-					document.insertString(document.getLength(), "\r\n", infoAttributeSet);
+					int length=document.getLength();
+					StyledDocument styledDocument=textPane.getStyledDocument();
+					document.insertString(length, time+"\r\n", infoAttributeSet);
+					styledDocument.setParagraphAttributes(length, document.getLength(), infoAttributeSet, true);
+					length=document.getLength();
+					document.insertString(length, source+"\r\n", infoAttributeSet);
+					styledDocument.setParagraphAttributes(length, document.getLength(), infoAttributeSet, true);
+					length=document.getLength();				
+					document.insertString(length, message+"\r\n", simpleAttributeSet);
+					styledDocument.setParagraphAttributes(length, document.getLength(), simpleAttributeSet, false);
+					length=document.getLength();
+					document.insertString(length, "\r\n", infoAttributeSet);
+					styledDocument.setParagraphAttributes(length, document.getLength(), infoAttributeSet, true);
 					textPane.setCaretPosition(textPane.getDocument().getLength());
 				}
 				catch (Exception e)
 				{
 					e.printStackTrace();
 				}
-				System.out.println("insert");
 				return;
 			}
+			StyleConstants.setAlignment(infoAttributeSet, StyleConstants.ALIGN_LEFT);
+			StyleConstants.setAlignment(simpleAttributeSet, StyleConstants.ALIGN_LEFT);
 			for(int i=0;i<userList.size();i++)
 			{
 				if(userList.get(i).name.equals(source))
 				{
 					StyleConstants.setFontFamily(simpleAttributeSet, userList.get(i).fontName);
-					StyleConstants.setFontSize(simpleAttributeSet, userList.get(i).fontSize);
+					StyleConstants.setFontSize(simpleAttributeSet, userList.get(i).fontSize);				
 					StyleConstants.setFontFamily(infoAttributeSet, "Consolas");
 					switch (userList.get(i).fontStyle)
 					{
@@ -390,16 +506,24 @@ public class Client extends JFrame
 					StyleConstants.setForeground(simpleAttributeSet, userList.get(i).color);
 					try
 					{
-						document.insertString(document.getLength(), time+"\r\n", infoAttributeSet);
-						document.insertString(document.getLength(), source+"\r\n", infoAttributeSet);
-						document.insertString(document.getLength(), message+"\r\n", simpleAttributeSet);
-						document.insertString(document.getLength(), "\r\n", infoAttributeSet);
+						int length=document.getLength();
+						StyledDocument styledDocument=textPane.getStyledDocument();
+						document.insertString(length, time+"\r\n", infoAttributeSet);
+						styledDocument.setParagraphAttributes(length, document.getLength(), infoAttributeSet, true);
+						length=document.getLength();
+						document.insertString(length, source+"\r\n", infoAttributeSet);
+						styledDocument.setParagraphAttributes(length, document.getLength(), infoAttributeSet, true);
+						length=document.getLength();				
+						document.insertString(length, message+"\r\n", simpleAttributeSet);
+						styledDocument.setParagraphAttributes(length, document.getLength(), simpleAttributeSet, false);
+						length=document.getLength();
+						document.insertString(length, "\r\n", infoAttributeSet);
+						styledDocument.setParagraphAttributes(length, document.getLength(), infoAttributeSet, true);
 					}
 					catch (Exception e)
 					{
 						e.printStackTrace();
 					}
-					System.out.println("inserted");
 				}
 			}
 		}
@@ -473,7 +597,7 @@ public class Client extends JFrame
 			label_Target.setText(targetName+"    "+targetNickName);
 			label_Target.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
 			label_Target.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/"+targetIcon+".png")));
-
+			
 			tglbtn_Bold = new JToggleButton("");
 			tglbtn_Bold.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/bold.png")));
 			tglbtn_Bold.setBounds(0, 427, 39, 35);
@@ -485,7 +609,7 @@ public class Client extends JFrame
 			contentPane.add(tglbtn_Italic);
 
 			comboBox_Font = new JComboBox();
-			comboBox_Font.setModel(new DefaultComboBoxModel(new String[] {"微软雅黑", "Consola", "Courier New"}));
+			comboBox_Font.setModel(new DefaultComboBoxModel(new String[] {"Microsoft YaHei", "Consola", "Courier New"}));
 			comboBox_Font.setMaximumRowCount(3);
 			comboBox_Font.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
 			comboBox_Font.setBounds(88, 427, 145, 35);
@@ -507,6 +631,8 @@ public class Client extends JFrame
 			button_SendFile.setBounds(386, 427, 49, 35);
 			contentPane.add(button_SendFile);
 
+			updateFontBar();
+			
 			setVisible(true);
 			
 			addWindowListener(new WindowAdapter()
@@ -1447,6 +1573,7 @@ public class Client extends JFrame
 			}
 		});
 	}
+	
 
 	private void createLogPad()
 	{
@@ -1754,6 +1881,7 @@ public class Client extends JFrame
 		
 		logpad.setVisible(true);
 	}
+	
 	
 	public static void main(String[] args)
 	{
