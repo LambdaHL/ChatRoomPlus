@@ -6,6 +6,8 @@ import java.net.*;
 import java.text.SimpleDateFormat;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
@@ -39,12 +41,14 @@ public class Client extends JFrame
 	private JMenuItem mntmChangeIcon0,mntmChangeIcon1,mntmChangeIcon2,mntmChangeIcon3,mntmChangeIcon4,mntmChangeIcon5;
 	private ArrayList<User> userList;
 	private Color color;
+	private ArrayList<PrivateChat> pChatList;
 	
 	public Client()
 	{
 		createLogPad();
 		createClientGUI();
 		userList=new ArrayList<>();
+		pChatList=new ArrayList<>();
 		new ConnectToServerThread().start();
 	}
 	
@@ -128,9 +132,26 @@ public class Client extends JFrame
 								String time=bufferedReader.readLine();
 								String source=bufferedReader.readLine();
 								String message=bufferedReader.readLine();
-								
-								//Unfinished:new private chat frame
-
+								if(pChatList.size()==0)
+								{
+									PrivateChat pChat=new PrivateChat(source);
+									pChatList.add(pChat);
+									pChat.appendMessage(time, source, message);
+									continue;
+								}
+								for(int i=0;i<pChatList.size();i++)//0 at start
+								{
+									if(pChatList.get(i).targetName.equals(source))
+									{
+										pChatList.get(i).appendMessage(time, source, message);
+									}
+									else
+									{
+										PrivateChat pChat=new PrivateChat(source);
+										pChatList.add(pChat);
+										pChat.appendMessage(time, source, message);
+									}
+								}
 								continue;
 							}
 						}
@@ -247,198 +268,380 @@ public class Client extends JFrame
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void createPrivateChat()
+ 	class PrivateChat extends JFrame
 	{
-		try 
+		private JScrollPane scrollPane;
+		private JLabel label_Me,label_Target;
+		private JToggleButton tglbtn_Bold,tglbtn_Italic;
+		private JButton button_Color,button_SendFile;
+		private JComboBox comboBox_Font,comboBox_Size;	
+		private JTextPane textPane;
+		private JTextField textField;
+		String targetName;
+		
+		public void setFontBold()
 		{
-			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+			tglbtn_Bold.doClick();
 		}
-		catch (Exception e)
+		
+		public void setFontItalic()
 		{
-			e.printStackTrace();
+			tglbtn_Italic.doClick();
 		}
-		JFrame pFrame=new JFrame("ChatRoomPlus");
-		pFrame.setResizable(false);
-		pFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		pFrame.setBounds(100, 100, 451, 574);
-		JPanel contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		contentPane.setLayout(null);
 		
-		JTextField textField = new JTextField();
-		textField.setBounds(0, 465, 385, 68);
-		contentPane.add(textField);
-		textField.setColumns(10);
-		
-		JButton btn_Enter = new JButton("");
-		btn_Enter.setIcon(new ImageIcon(PrivateChatGUI.class.getResource("/client/Icons/enter.png")));
-		btn_Enter.setBounds(386, 465, 49, 68);
-		contentPane.add(btn_Enter);
-		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setAutoscrolls(true);
-		scrollPane.setBounds(0, 56, 435, 368);
-		contentPane.add(scrollPane);
-		
-		JTextPane textPane = new JTextPane();
-		scrollPane.setViewportView(textPane);
-		textPane.setEditable(false);
-		
-		JLabel label_Me = new JLabel("");
-		label_Me.setBounds(0, 0, 435, 25);
-		contentPane.add(label_Me);
-		
-		JLabel label_Source = new JLabel("");
-		label_Source.setBounds(0, 29, 435, 25);
-		contentPane.add(label_Source);
-		
-		JToggleButton tglbtn_Bold = new JToggleButton("");
-		tglbtn_Bold.setIcon(new ImageIcon(PrivateChatGUI.class.getResource("/client/Icons/bold.png")));
-		tglbtn_Bold.setBounds(0, 427, 39, 35);
-		contentPane.add(tglbtn_Bold);
-		
-		JToggleButton tglbtn_Italic = new JToggleButton("");
-		tglbtn_Italic.setIcon(new ImageIcon(PrivateChatGUI.class.getResource("/client/Icons/italic.png")));
-		tglbtn_Italic.setBounds(39, 427, 39, 35);
-		contentPane.add(tglbtn_Italic);
-		
-		JComboBox comboBox_Font = new JComboBox();
-		comboBox_Font.setModel(new DefaultComboBoxModel(new String[] {"微软雅黑", "Consola", "Courier New"}));
-		comboBox_Font.setMaximumRowCount(3);
-		comboBox_Font.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
-		comboBox_Font.setBounds(88, 427, 145, 35);
-		contentPane.add(comboBox_Font);
-		
-		JComboBox comboBox_Size = new JComboBox();
-		comboBox_Size.setModel(new DefaultComboBoxModel(new String[] {"14", "16", "18", "20", "22", "24"}));
-		comboBox_Size.setFont(new Font("Courier New", Font.PLAIN, 18));
-		comboBox_Size.setBounds(243, 427, 93, 35);
-		contentPane.add(comboBox_Size);
-		
-		JButton button_Color = new JButton("");
-		button_Color.setIcon(new ImageIcon(PrivateChatGUI.class.getResource("/client/Icons/color.png")));
-		button_Color.setBounds(346, 427, 39, 35);
-		contentPane.add(button_Color);
-		
-		JButton button_SendFile = new JButton("");
-		button_SendFile.setIcon(new ImageIcon(PrivateChatGUI.class.getResource("/client/Icons/file.png")));
-		button_SendFile.setBounds(386, 427, 49, 35);
-		contentPane.add(button_SendFile);
-		
-		tglbtn_Bold.addActionListener(new ActionListener()
+		public void setFont()
 		{
-			@Override
-			public void actionPerformed(ActionEvent e) 
-			{
-				if(tglbtn_Bold.isSelected())
-				{
-					if(tglbtn_Italic.isSelected())
-					{
-						font=new Font(fontName,Font.BOLD+Font.ITALIC,font.getSize());
-						fontStyle=Font.BOLD+Font.ITALIC;
-						textField.setFont(font);
-						Client.this.tglbtn_Bold.setSelected(true);
-						Client.this.tglbtn_Italic.setSelected(true);
-					}
-					else
-					{
-						font=new Font(fontName,Font.BOLD,font.getSize());
-						fontStyle=Font.BOLD;
-						textField.setFont(font);
-						Client.this.tglbtn_Bold.setSelected(true);
-						Client.this.tglbtn_Italic.setSelected(false);
-					}
-				}
-				else
-				{
-					if(tglbtn_Italic.isSelected())
-					{
-						font=new Font(fontName,Font.ITALIC,font.getSize());
-						fontStyle=Font.ITALIC;
-						textField.setFont(font);
-						Client.this.tglbtn_Bold.setSelected(false);
-						Client.this.tglbtn_Italic.setSelected(true);
-					}
-					else
-					{
-						font=new Font(fontName,Font.PLAIN,font.getSize());
-						fontStyle=Font.PLAIN;
-						textField.setFont(font);
-						Client.this.tglbtn_Bold.setSelected(false);
-						Client.this.tglbtn_Italic.setSelected(false);
-					}
-				}
-			}
-		});
+			textField.setFont(font);
+		}
 		
-		tglbtn_Italic.addActionListener(new ActionListener()
-		{	
-			@Override
-			public void actionPerformed(ActionEvent e) 
-			{
-				if(tglbtn_Bold.isSelected())
-				{
-					if(tglbtn_Italic.isSelected())
-					{
-						font=new Font(fontName,Font.BOLD+Font.ITALIC,font.getSize());
-						fontStyle=Font.BOLD+Font.ITALIC;
-						textField.setFont(font);
-						Client.this.tglbtn_Bold.setSelected(true);
-						Client.this.tglbtn_Italic.setSelected(true);
-					}
-					else
-					{
-						font=new Font(fontName,Font.BOLD,font.getSize());
-						fontStyle=Font.BOLD;
-						textField.setFont(font);
-						Client.this.tglbtn_Bold.setSelected(true);
-						Client.this.tglbtn_Italic.setSelected(false);
-					}
-				}
-				else
-				{
-					if(tglbtn_Italic.isSelected())
-					{
-						font=new Font(fontName,Font.ITALIC,font.getSize());
-						fontStyle=Font.ITALIC;
-						textField.setFont(font);
-						Client.this.tglbtn_Bold.setSelected(false);
-						Client.this.tglbtn_Italic.setSelected(true);
-					}
-					else
-					{
-						font=new Font(fontName,Font.PLAIN,font.getSize());
-						fontStyle=Font.PLAIN;
-						textField.setFont(font);
-						Client.this.tglbtn_Bold.setSelected(false);
-						Client.this.tglbtn_Italic.setSelected(false);
-					}
-				}
-			}
-		});
-		
-		button_Color.addActionListener(new ActionListener()
-		{			
-			@Override
-			public void actionPerformed(ActionEvent e) 
-			{
-				JColorChooser jColorChooser=new JColorChooser(Color.BLACK);
-				color=jColorChooser.showDialog(null, "Set text color", Color.BLACK);
-				textField.setForeground(color);
-				Client.this.textField.setForeground(color);
-			}
-		});
-		
-		comboBox_Font.addItemListener(new ItemListener()
+		public void setColor()
 		{
-			@Override
-			public void itemStateChanged(ItemEvent e) 
+			textField.setForeground(color);
+		}
+		
+		public void appendMessage(String time,String source,String message)
+		{
+			SimpleAttributeSet simpleAttributeSet=new SimpleAttributeSet();
+			SimpleAttributeSet infoAttributeSet=new SimpleAttributeSet();
+			StyleConstants.setFontFamily(infoAttributeSet, "Consolas");
+			Document document=textPane.getDocument();
+			System.out.println("R");
+			if(source.equals(userName))
 			{
-				if(e.getStateChange()==ItemEvent.SELECTED)
+				StyleConstants.setFontFamily(simpleAttributeSet, fontName);
+				StyleConstants.setFontSize(simpleAttributeSet, fontSize);
+				switch (fontStyle)
 				{
-					switch (comboBox_FontName.getSelectedIndex())
+					case Font.PLAIN:
 					{
+						StyleConstants.setBold(simpleAttributeSet, false);
+						StyleConstants.setItalic(simpleAttributeSet, false);
+						break;
+					}
+					case Font.BOLD:
+					{
+						StyleConstants.setBold(simpleAttributeSet, true);
+						StyleConstants.setItalic(simpleAttributeSet, false);
+						break;
+					}
+					case Font.ITALIC:
+					{
+						StyleConstants.setBold(simpleAttributeSet, false);
+						StyleConstants.setItalic(simpleAttributeSet, true);
+						break;
+					}
+					case Font.BOLD+Font.ITALIC:
+					{
+						StyleConstants.setBold(simpleAttributeSet, true);
+						StyleConstants.setItalic(simpleAttributeSet, true);
+						break;
+					}
+				}
+				StyleConstants.setForeground(simpleAttributeSet, color);
+				try
+				{
+					document.insertString(document.getLength(), time+"\r\n", infoAttributeSet);
+					document.insertString(document.getLength(), source+"\r\n", infoAttributeSet);
+					document.insertString(document.getLength(), message+"\r\n", simpleAttributeSet);
+					document.insertString(document.getLength(), "\r\n", infoAttributeSet);
+					textPane.setCaretPosition(textPane.getDocument().getLength());
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+				System.out.println("insert");
+				return;
+			}
+			for(int i=0;i<userList.size();i++)
+			{
+				if(userList.get(i).name.equals(source))
+				{
+					StyleConstants.setFontFamily(simpleAttributeSet, userList.get(i).fontName);
+					StyleConstants.setFontSize(simpleAttributeSet, userList.get(i).fontSize);
+					StyleConstants.setFontFamily(infoAttributeSet, "Consolas");
+					switch (userList.get(i).fontStyle)
+					{
+						case Font.PLAIN:
+						{
+							StyleConstants.setBold(simpleAttributeSet, false);
+							StyleConstants.setItalic(simpleAttributeSet, false);
+							break;
+						}
+						case Font.BOLD:
+						{
+							StyleConstants.setBold(simpleAttributeSet, true);
+							StyleConstants.setItalic(simpleAttributeSet, false);
+							break;
+						}
+						case Font.ITALIC:
+						{
+							StyleConstants.setBold(simpleAttributeSet, false);
+							StyleConstants.setItalic(simpleAttributeSet, true);
+							break;
+						}
+						case Font.BOLD+Font.ITALIC:
+						{
+							StyleConstants.setBold(simpleAttributeSet, true);
+							StyleConstants.setItalic(simpleAttributeSet, true);
+							break;
+						}
+					}
+					StyleConstants.setForeground(simpleAttributeSet, userList.get(i).color);
+					try
+					{
+						document.insertString(document.getLength(), time+"\r\n", infoAttributeSet);
+						document.insertString(document.getLength(), source+"\r\n", infoAttributeSet);
+						document.insertString(document.getLength(), message+"\r\n", simpleAttributeSet);
+						document.insertString(document.getLength(), "\r\n", infoAttributeSet);
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+					System.out.println("inserted");
+				}
+			}
+		}
+		
+		public PrivateChat(String targetName)
+		{
+			try 
+			{
+				UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			
+			this.targetName=targetName;
+			
+			setTitle("ChatRoomPlus   -Chating with "+targetName);
+			setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			setResizable(false);
+			setBounds(100, 100, 451, 574);
+			
+			contentPane = new JPanel();
+			contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+			setContentPane(contentPane);
+			contentPane.setLayout(null);
+
+			textField = new JTextField();
+			textField.setBounds(0, 465, 385, 68);
+			contentPane.add(textField);
+			textField.setColumns(10);
+			textField.setFont(font);
+			
+			btn_Enter = new JButton("");
+			btn_Enter.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/enter.png")));
+			btn_Enter.setBounds(386, 465, 49, 68);
+			btn_Enter.setEnabled(false);
+			contentPane.add(btn_Enter);
+
+			scrollPane = new JScrollPane();
+			scrollPane.setAutoscrolls(true);
+			scrollPane.setBounds(0, 56, 435, 368);
+			contentPane.add(scrollPane);
+
+			textPane = new JTextPane();
+			scrollPane.setViewportView(textPane);
+			textPane.setEditable(false);
+
+			label_Me = new JLabel("");
+			label_Me.setBounds(0, 0, 435, 25);
+			contentPane.add(label_Me);
+
+			label_Target = new JLabel("");
+			label_Target.setBounds(0, 29, 435, 25);
+			contentPane.add(label_Target);
+
+			label_Me.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/"+icon+".png")));
+			label_Me.setText(userName+"    "+userNickName);
+			label_Me.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
+			String targetIcon=new String();
+			String targetNickName=new String();
+			for(int i=0;i<userList.size();i++)
+			{
+				if(userList.get(i).name.equals(targetName))
+				{
+					targetIcon=userList.get(i).icon;
+					targetNickName=userList.get(i).nickName;
+				}
+			}
+			label_Target.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+			label_Target.setText(targetName+"    "+targetNickName);
+			label_Target.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
+			label_Target.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/"+targetIcon+".png")));
+
+			tglbtn_Bold = new JToggleButton("");
+			tglbtn_Bold.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/bold.png")));
+			tglbtn_Bold.setBounds(0, 427, 39, 35);
+			contentPane.add(tglbtn_Bold);
+
+			tglbtn_Italic = new JToggleButton("");
+			tglbtn_Italic.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/italic.png")));
+			tglbtn_Italic.setBounds(39, 427, 39, 35);
+			contentPane.add(tglbtn_Italic);
+
+			comboBox_Font = new JComboBox();
+			comboBox_Font.setModel(new DefaultComboBoxModel(new String[] {"微软雅黑", "Consola", "Courier New"}));
+			comboBox_Font.setMaximumRowCount(3);
+			comboBox_Font.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
+			comboBox_Font.setBounds(88, 427, 145, 35);
+			contentPane.add(comboBox_Font);
+
+			comboBox_Size = new JComboBox();
+			comboBox_Size.setModel(new DefaultComboBoxModel(new String[] {"14", "16", "18", "20", "22", "24"}));
+			comboBox_Size.setFont(new Font("Courier New", Font.PLAIN, 18));
+			comboBox_Size.setBounds(243, 427, 93, 35);
+			contentPane.add(comboBox_Size);
+
+			button_Color = new JButton("");
+			button_Color.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/color.png")));
+			button_Color.setBounds(346, 427, 39, 35);
+			contentPane.add(button_Color);
+
+			button_SendFile = new JButton("");
+			button_SendFile.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/file.png")));
+			button_SendFile.setBounds(386, 427, 49, 35);
+			contentPane.add(button_SendFile);
+
+			setVisible(true);
+			
+			addWindowListener(new WindowAdapter()
+			{
+				@Override
+				public void windowClosing(WindowEvent e)
+				{
+					try
+					{
+						for(int i=0;i<pChatList.size();i++)
+						{
+							if(pChatList.get(i).targetName.equals(targetName))
+								pChatList.remove(i);
+						}
+					}
+					catch (Exception E)
+					{
+						E.printStackTrace();
+					}
+				}
+			});
+			
+			tglbtn_Bold.addChangeListener(new ChangeListener()
+			{
+				@Override
+				public void stateChanged(ChangeEvent e) 
+				{	
+					if(tglbtn_Bold.isSelected())
+					{
+						if(tglbtn_Italic.isSelected())
+						{
+							font=new Font(fontName,Font.BOLD+Font.ITALIC,font.getSize());
+							fontStyle=Font.BOLD+Font.ITALIC;
+							textField.setFont(font);
+							Client.this.tglbtn_Bold.setSelected(true);
+							Client.this.tglbtn_Italic.setSelected(true);
+						}
+						else
+						{
+							font=new Font(fontName,Font.BOLD,font.getSize());
+							fontStyle=Font.BOLD;
+							textField.setFont(font);
+							Client.this.tglbtn_Bold.setSelected(true);
+							Client.this.tglbtn_Italic.setSelected(false);
+						}
+					}
+					else
+					{
+						if(tglbtn_Italic.isSelected())
+						{
+							font=new Font(fontName,Font.ITALIC,font.getSize());
+							fontStyle=Font.ITALIC;
+							textField.setFont(font);
+							Client.this.tglbtn_Bold.setSelected(false);
+							Client.this.tglbtn_Italic.setSelected(true);
+						}
+						else
+						{
+							font=new Font(fontName,Font.PLAIN,font.getSize());
+							fontStyle=Font.PLAIN;
+							textField.setFont(font);
+							Client.this.tglbtn_Bold.setSelected(false);
+							Client.this.tglbtn_Italic.setSelected(false);
+						}
+					}
+				}
+			});
+
+			tglbtn_Italic.addChangeListener(new ChangeListener()
+			{
+				@Override
+				public void stateChanged(ChangeEvent e) 
+				{
+					if(tglbtn_Bold.isSelected())
+					{
+						if(tglbtn_Italic.isSelected())
+						{
+							font=new Font(fontName,Font.BOLD+Font.ITALIC,font.getSize());
+							fontStyle=Font.BOLD+Font.ITALIC;
+							textField.setFont(font);
+							Client.this.tglbtn_Bold.setSelected(true);
+							Client.this.tglbtn_Italic.setSelected(true);
+						}
+						else
+						{
+							font=new Font(fontName,Font.BOLD,font.getSize());
+							fontStyle=Font.BOLD;
+							textField.setFont(font);
+							Client.this.tglbtn_Bold.setSelected(true);
+							Client.this.tglbtn_Italic.setSelected(false);
+						}
+					}
+					else
+					{
+						if(tglbtn_Italic.isSelected())
+						{
+							font=new Font(fontName,Font.ITALIC,font.getSize());
+							fontStyle=Font.ITALIC;
+							textField.setFont(font);
+							Client.this.tglbtn_Bold.setSelected(false);
+							Client.this.tglbtn_Italic.setSelected(true);
+						}
+						else
+						{
+							font=new Font(fontName,Font.PLAIN,font.getSize());
+							fontStyle=Font.PLAIN;
+							textField.setFont(font);
+							Client.this.tglbtn_Bold.setSelected(false);
+							Client.this.tglbtn_Italic.setSelected(false);
+						}
+					}
+				}
+			});
+
+			button_Color.addActionListener(new ActionListener()
+			{			
+				@Override
+				public void actionPerformed(ActionEvent e) 
+				{
+					JColorChooser jColorChooser=new JColorChooser(Color.BLACK);
+					color=jColorChooser.showDialog(null, "Set text color", Color.BLACK);
+					textField.setForeground(color);
+					Client.this.textField.setForeground(color);
+				}
+			});
+
+			comboBox_Font.addItemListener(new ItemListener()
+			{
+				@Override
+				public void itemStateChanged(ItemEvent e) 
+				{
+					if(e.getStateChange()==ItemEvent.SELECTED)
+					{
+						switch (comboBox_FontName.getSelectedIndex())
+						{
 						case 0://Microsoft YaHei
 						{
 							font=new Font("Microsoft YaHei",font.getStyle(),font.getSize());
@@ -466,20 +669,20 @@ public class Client extends JFrame
 							Client.this.textField.setFont(font);
 							break;
 						}
+						}
 					}
 				}
-			}
-		});
-		
-		comboBox_Size.addItemListener(new ItemListener()
-		{
-			@Override
-			public void itemStateChanged(ItemEvent e) 
+			});
+
+			comboBox_Size.addItemListener(new ItemListener()
 			{
-				if(e.getStateChange()==ItemEvent.SELECTED)
+				@Override
+				public void itemStateChanged(ItemEvent e) 
 				{
-					switch (comboBox_FontSize.getSelectedIndex())
+					if(e.getStateChange()==ItemEvent.SELECTED)
 					{
+						switch (comboBox_FontSize.getSelectedIndex())
+						{
 						case 0://14
 						{
 							font=new Font(font.getFontName(), font.getStyle(), 14);
@@ -534,12 +737,53 @@ public class Client extends JFrame
 							Client.this.textField.setFont(font);
 							break;
 						}
+						}
 					}
 				}
-			}
-		});
-		
-		
+			});
+			
+			textField.addKeyListener(new KeyAdapter()
+			{
+				@Override
+				public void keyReleased(KeyEvent e)
+				{
+					if(textField.getText().isEmpty())
+						btn_Enter.setEnabled(false);
+					else
+						btn_Enter.setEnabled(true);
+					if(e.getKeyChar()==KeyEvent.VK_ENTER && btn_Enter.isEnabled())
+						btn_Enter.doClick();
+				}
+			});
+			
+			btn_Enter.addActionListener(new ActionListener() 
+			{
+				@Override
+				public void actionPerformed(ActionEvent e) 
+				{
+					printWriter.println("#Update Color");
+					printWriter.println(color.getRGB());
+					printWriter.println("#Update Font");
+					printWriter.println(fontName);
+					printWriter.println(fontStyle);
+					printWriter.println(fontSize);
+					printWriter.flush();
+					printWriter.println("#MessageTo");
+					SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+					String time=simpleDateFormat.format(new Date());
+					printWriter.println(time);
+					String source=userName;
+					printWriter.println(source);
+					printWriter.println(targetName);
+					String message=textField.getText();
+					printWriter.println(message);
+					printWriter.flush();
+					appendMessage(time, userName, message);
+					textField.setText("");
+					btn_Enter.setEnabled(false);
+				}
+			});
+		}
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -760,15 +1004,8 @@ public class Client extends JFrame
 				String source=userName;
 				printWriter.println(source);
 				String message=textField.getText();
-				//#Message
-				//1980-1-1 00:00:00
-				//Aris
-				//HelloWorld
 				printWriter.println(message);
 				printWriter.flush();
-				
-				//Unfinished:textpane
-				
 				textField.setText("");
 				btn_Enter.setEnabled(false);
 			}
@@ -922,12 +1159,27 @@ public class Client extends JFrame
 						font=new Font(fontName,Font.BOLD+Font.ITALIC,font.getSize());
 						fontStyle=Font.BOLD+Font.ITALIC;
 						textField.setFont(font);
+						if(!pChatList.isEmpty())
+						{
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFontBold();
+								pChatList.get(i).setFontItalic();
+							}
+						}
 					}
 					else
 					{
 						font=new Font(fontName,Font.BOLD,font.getSize());
 						fontStyle=Font.BOLD;
 						textField.setFont(font);
+						if(!pChatList.isEmpty())
+						{
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFontBold();
+							}
+						}
 					}
 				}
 				else
@@ -937,12 +1189,27 @@ public class Client extends JFrame
 						font=new Font(fontName,Font.ITALIC,font.getSize());
 						fontStyle=Font.ITALIC;
 						textField.setFont(font);
+						if(!pChatList.isEmpty())
+						{
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFontItalic();
+							}
+						}
 					}
 					else
 					{
 						font=new Font(fontName,Font.PLAIN,font.getSize());
 						fontStyle=Font.PLAIN;
 						textField.setFont(font);
+						if(!pChatList.isEmpty())
+						{
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFontBold();
+								pChatList.get(i).setFontItalic();
+							}
+						}
 					}
 				}
 			}
@@ -960,12 +1227,27 @@ public class Client extends JFrame
 						font=new Font(fontName,Font.BOLD+Font.ITALIC,font.getSize());
 						fontStyle=Font.BOLD+Font.ITALIC;
 						textField.setFont(font);
+						if(!pChatList.isEmpty())
+						{
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFontBold();
+								pChatList.get(i).setFontItalic();
+							}
+						}
 					}
 					else
 					{
 						font=new Font(fontName,Font.BOLD,font.getSize());
 						fontStyle=Font.BOLD;
 						textField.setFont(font);
+						if(!pChatList.isEmpty())
+						{
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFontBold();
+							}
+						}
 					}
 				}
 				else
@@ -975,12 +1257,27 @@ public class Client extends JFrame
 						font=new Font(fontName,Font.ITALIC,font.getSize());
 						fontStyle=Font.ITALIC;
 						textField.setFont(font);
+						if(!pChatList.isEmpty())
+						{
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFontItalic();
+							}
+						}
 					}
 					else
 					{
 						font=new Font(fontName,Font.PLAIN,font.getSize());
 						fontStyle=Font.PLAIN;
 						textField.setFont(font);
+						if(!pChatList.isEmpty())
+						{
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFontBold();
+								pChatList.get(i).setFontItalic();
+							}
+						}
 					}
 				}
 			}
@@ -1000,6 +1297,10 @@ public class Client extends JFrame
 							font=new Font("Microsoft YaHei",font.getStyle(),font.getSize());
 							fontName="Microsoft YaHei";
 							textField.setFont(font);
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFont();
+							}
 							break;
 						}
 						case 1://Consolas
@@ -1007,6 +1308,10 @@ public class Client extends JFrame
 							font=new Font("Consolas",font.getStyle(),font.getSize());
 							fontName="Consolas";
 							textField.setFont(font);
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFont();
+							}
 							break;
 						}
 						case 2://Courier New
@@ -1014,6 +1319,10 @@ public class Client extends JFrame
 							font=new Font("Courier New",font.getStyle(),font.getSize());
 							fontName="Courier New";
 							textField.setFont(font);
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFont();
+							}
 							break;
 						}
 					}
@@ -1035,6 +1344,10 @@ public class Client extends JFrame
 							font=new Font(font.getFontName(), font.getStyle(), 14);
 							fontSize=14;
 							textField.setFont(font);
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFont();
+							}
 							break;
 						}
 						case 1://16
@@ -1042,6 +1355,10 @@ public class Client extends JFrame
 							font=new Font(font.getFontName(), font.getStyle(), 16);
 							fontSize=16;
 							textField.setFont(font);
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFont();
+							}
 							break;
 						}
 						case 2://18
@@ -1049,6 +1366,10 @@ public class Client extends JFrame
 							font=new Font(font.getFontName(), font.getStyle(), 18);
 							fontSize=18;
 							textField.setFont(font);
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFont();
+							}
 							break;
 						}
 						case 3://20
@@ -1056,6 +1377,10 @@ public class Client extends JFrame
 							font=new Font(font.getFontName(), font.getStyle(), 20);
 							fontSize=20;
 							textField.setFont(font);
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFont();
+							}
 							break;
 						}
 						case 4://22
@@ -1063,6 +1388,10 @@ public class Client extends JFrame
 							font=new Font(font.getFontName(), font.getStyle(), 22);
 							fontSize=22;
 							textField.setFont(font);
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFont();
+							}
 							break;
 						}
 						case 5://24
@@ -1070,6 +1399,10 @@ public class Client extends JFrame
 							font=new Font(font.getFontName(), font.getStyle(), 24);
 							fontSize=24;
 							textField.setFont(font);
+							for(int i=0;i<pChatList.size();i++)
+							{
+								pChatList.get(i).setFont();
+							}
 							break;
 						}
 					}
@@ -1085,7 +1418,32 @@ public class Client extends JFrame
 				JColorChooser jColorChooser=new JColorChooser(Color.BLACK);
 				color=jColorChooser.showDialog(null, "Set text color", Color.BLACK);
 				textField.setForeground(color);
-				//cascade change all private chat frame
+				for(int i=0;i<pChatList.size();i++)
+				{
+					pChatList.get(i).setColor();
+				}
+			}
+		});
+		
+		list_UserList.addMouseListener(new MouseAdapter()
+		{
+			@Override
+			public void mouseReleased(MouseEvent e) 
+			{
+				if(e.getClickCount()==2)
+				{
+					User user=(User)list_UserList.getSelectedValue();
+					for(int i=0;i<pChatList.size();i++)
+					{
+						if(pChatList.get(i).targetName.equals(user.name))
+						{
+							return;
+						}
+					}
+					PrivateChat pChat=new PrivateChat(user.name);
+					pChatList.add(pChat);
+				}
+				super.mouseReleased(e);
 			}
 		});
 	}

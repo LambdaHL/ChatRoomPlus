@@ -286,8 +286,6 @@ public class Server extends JFrame
 							String message=bufferedReader.readLine();
 							updateUserList();
 							sendTo(time, source, target, message);
-							//Unfinished:private chat
-							
 							continue;
 						}
 						
