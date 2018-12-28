@@ -296,10 +296,11 @@ public class Client extends JFrame
 		private JScrollPane scrollPane;
 		private JLabel label_Me,label_Target;
 		private JToggleButton tglbtn_Bold,tglbtn_Italic;
-		private JButton button_Color,button_SendFile;
+		private JButton button_Color,button_SendFile,btn_Enter;
 		private JComboBox comboBox_Font,comboBox_Size;	
 		private JTextPane textPane;
 		private JTextField textField;
+		private JPanel contentPane;
 		String targetName;
 		
 		private void updateFontBar()
