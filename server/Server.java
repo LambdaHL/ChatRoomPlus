@@ -3,6 +3,8 @@ package server;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
+import client.MessageRecordFrame;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.*;
@@ -21,13 +23,15 @@ public class Server extends JFrame
 	private ArrayList<Client> clients;
 	private DBOperator dbOperator;
 	private ArrayList<User> userList;
+	private File groupMsgFile;
 	
 	public Server()
 	{
-		new DBOperator().reset();
+		dbOperator=new DBOperator();
+		dbOperator.reset();
+		groupMsgFile=new File(System.getProperty("user.dir")+"/server/MsgRec/Group.txt");
 		clients=new ArrayList<Client>();
 		userList=new ArrayList<User>();
-		dbOperator=new DBOperator();
 		createGUI();
 		new ServerAcceptThread().start();
 	}
@@ -96,6 +100,43 @@ public class Server extends JFrame
 		setVisible(true);
 	}
 
+	private void saveGroupMsgRec(String time,String source,String message)
+	{
+		PrintWriter pWriter;
+		try
+		{
+			pWriter=new PrintWriter(new FileWriter(groupMsgFile,true));
+			pWriter.println(time+"\n");
+			pWriter.println(source+"\n");
+			pWriter.println(message+"\n");
+			pWriter.flush();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		
+	}
+	
+	private synchronized ArrayList<String> getGroupMsgRec()
+	{
+		BufferedReader bReader;
+		ArrayList<String> strings=new ArrayList<String>();
+		try
+		{
+			bReader=new BufferedReader(new FileReader(groupMsgFile));
+			while(bReader.ready())
+			{
+				strings.add(bReader.readLine());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+		return strings;
+	}
+	
 	class ServerAcceptThread extends Thread
 	{
 		private ServerSocket serverSocket;
@@ -125,22 +166,17 @@ public class Server extends JFrame
 	class Client extends Thread
 	{
 		private Socket socket;
-		private String userName,userNickName,icon,ipString,terminateString;
+		private String userName,userNickName,icon,terminateString;
 		private PrintWriter printWriter;
 		private BufferedReader bufferedReader;
 		private String string;
-		private boolean isLogged;
-		private Date date;
-		private SimpleDateFormat simpleDateFormat;
-		private boolean isLoggedout;
-		private User user;
-		private Font font;
+		private boolean isLogged,isLoggedout;
 		private String fontName;
 		private Color color;
 		private int fontStyle,fontSize;
-		
+
 		@Override
-		public void run()//individual listen
+		public void run()
 		{
 			try
 			{
@@ -148,7 +184,7 @@ public class Server extends JFrame
 				{
 					if(!isLoggedout)
 					{
-						while(!bufferedReader.ready()) {sleep(500);}
+						while(!bufferedReader.ready()) {sleep(200);}
 						string=bufferedReader.readLine();
 						if(string.equals("#Register"))
 						{
@@ -196,7 +232,6 @@ public class Server extends JFrame
 										isLoggedout=false;
 										this.userName=userName;
 										this.userNickName=dbOperator.getUserNickName(userName);
-										this.font=dbOperator.getFont(userName);
 										this.fontName=dbOperator.getFontName(userName);
 										this.fontStyle=dbOperator.getFontStyle(userName);
 										this.fontSize=dbOperator.getFontSize(userName);
@@ -212,7 +247,6 @@ public class Server extends JFrame
 										printWriter.println(rgb);
 										printWriter.flush();
 										userList.add(this.getUser());
-										this.user=this.getUser();
 										updateUserList();
 										break;
 									}
@@ -275,6 +309,7 @@ public class Server extends JFrame
 							textArea_Conversation.append("\r\n");
 							updateUserList();
 							sendToAll(time, source, message);
+							saveGroupMsgRec(time, source, message);
 							continue;
 						}
 						
@@ -362,6 +397,19 @@ public class Server extends JFrame
 							dbOperator.setColor(userName, rgb);
 							continue;
 						}
+						
+						if(string.equals("#Group Record"))
+						{
+							ArrayList<String> strings=getGroupMsgRec();
+							printWriter.println(strings.size());
+							for(String string:strings)
+							{
+								printWriter.println(string);
+							}
+							printWriter.flush();
+							System.out.println("Send");
+							continue;
+						}
 					}
 				}
 			}
@@ -387,7 +435,6 @@ public class Server extends JFrame
 			this.socket=socket;
 			isLogged=false;
 			isLoggedout=false;
-			ipString="IP:" + socket.getInetAddress() + ":" + socket.getPort();
 			try
 			{
 				printWriter=new PrintWriter(socket.getOutputStream());

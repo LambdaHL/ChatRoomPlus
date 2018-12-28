@@ -91,7 +91,7 @@ public class Client extends JFrame
 				{
 					while(!socket.isClosed())
 					{
-						while(!bufferedReader.ready()) {sleep(500);}
+						while(!bufferedReader.ready()) {sleep(200);}
 						string=bufferedReader.readLine();
 						if(string!=null)
 						{
@@ -128,7 +128,7 @@ public class Client extends JFrame
 								continue;
 							}
 
-							if(string.equals("#Message From"))//received private message
+							if(string.equals("#Message From"))
 							{
 								String time=bufferedReader.readLine();
 								String source=bufferedReader.readLine();
@@ -140,7 +140,7 @@ public class Client extends JFrame
 									pChat.appendMessage(time, source, message);
 									continue;
 								}
-								for(int i=0;i<pChatList.size();i++)//0 at start
+								for(int i=0;i<pChatList.size();i++)
 								{
 									if(pChatList.get(i).targetName.equals(source))
 									{
@@ -1573,9 +1573,34 @@ public class Client extends JFrame
 				super.mouseReleased(e);
 			}
 		});
+		
+		mntmShowRecoord.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				try
+				{
+					printWriter.println("#Group Record");
+					printWriter.flush();
+					int size=Integer.parseInt(bufferedReader.readLine());
+					System.out.println("size:"+size);
+					ArrayList<String> strings=new ArrayList<String>();
+					for(int i=0;i<size;i++)
+					{
+						System.out.println("No."+i);
+						strings.add(bufferedReader.readLine());
+					}
+					new MessageRecordFrame(strings);
+				}
+				catch (Exception E)
+				{
+					E.printStackTrace();
+				}
+			}
+		});
 	}
 	
-
 	private void createLogPad()
 	{
 		logpad=new JFrame();
@@ -1882,7 +1907,6 @@ public class Client extends JFrame
 		
 		logpad.setVisible(true);
 	}
-	
 	
 	public static void main(String[] args)
 	{
