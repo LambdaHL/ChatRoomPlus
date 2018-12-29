@@ -155,6 +155,18 @@ public class Client extends JFrame
 								}
 								continue;
 							}
+							
+							if(string.equals("#Group Record"))
+							{
+								int size=Integer.parseInt(bufferedReader.readLine());
+								ArrayList<String> strings=new ArrayList<String>();
+								for(int i=0;i<size;i++)
+								{
+									strings.add(bufferedReader.readLine());
+								}
+								new MessageRecordFrame(strings);
+								continue;
+							}
 						}
 					}
 				}
@@ -572,7 +584,7 @@ public class Client extends JFrame
 			textPane = new JTextPane();
 			scrollPane.setViewportView(textPane);
 			textPane.setEditable(false);
-
+			
 			label_Me = new JLabel("");
 			label_Me.setBounds(0, 0, 435, 25);
 			contentPane.add(label_Me);
@@ -1583,15 +1595,6 @@ public class Client extends JFrame
 				{
 					printWriter.println("#Group Record");
 					printWriter.flush();
-					int size=Integer.parseInt(bufferedReader.readLine());
-					System.out.println("size:"+size);
-					ArrayList<String> strings=new ArrayList<String>();
-					for(int i=0;i<size;i++)
-					{
-						System.out.println("No."+i);
-						strings.add(bufferedReader.readLine());
-					}
-					new MessageRecordFrame(strings);
 				}
 				catch (Exception E)
 				{

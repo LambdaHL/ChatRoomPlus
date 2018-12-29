@@ -71,6 +71,7 @@ public class Server extends JFrame
 		
 		textArea_Conversation = new JTextArea();
 		textArea_Conversation.setEditable(false);
+		textArea_Conversation.setLineWrap(true);
 		scrollPane_TextArea.setViewportView(textArea_Conversation);
 		
 		JSeparator separator = new JSeparator();
@@ -100,15 +101,15 @@ public class Server extends JFrame
 		setVisible(true);
 	}
 
-	private void saveGroupMsgRec(String time,String source,String message)
+	private synchronized void saveGroupMsgRec(String time,String source,String message)
 	{
 		PrintWriter pWriter;
 		try
 		{
 			pWriter=new PrintWriter(new FileWriter(groupMsgFile,true));
-			pWriter.println(time+"\n");
-			pWriter.println(source+"\n");
-			pWriter.println(message+"\n");
+			pWriter.println(time);
+			pWriter.println(source);
+			pWriter.println(message);
 			pWriter.flush();
 		}
 		catch (Exception e)
@@ -401,13 +402,13 @@ public class Server extends JFrame
 						if(string.equals("#Group Record"))
 						{
 							ArrayList<String> strings=getGroupMsgRec();
+							printWriter.println("#Group Record");
 							printWriter.println(strings.size());
 							for(String string:strings)
 							{
 								printWriter.println(string);
 							}
 							printWriter.flush();
-							System.out.println("Send");
 							continue;
 						}
 					}
