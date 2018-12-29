@@ -948,7 +948,6 @@ public class Client extends JFrame
 		JScrollPane scrollPane_OnlineUserList = new JScrollPane();
 		scrollPane_OnlineUserList.setAutoscrolls(true);
 		scrollPane_OnlineUserList.setBounds(630, 25, 208, 281);
-		scrollPane_OnlineUserList.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 		contentPane.add(scrollPane_OnlineUserList);
 		
 		list_UserList = new JList<>();
@@ -957,7 +956,6 @@ public class Client extends JFrame
 		JScrollPane scrollPane_Message = new JScrollPane();
 		scrollPane_Message.setAutoscrolls(true);
 		scrollPane_Message.setBounds(0, 25, 622, 446);
-		scrollPane_Message.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
 		contentPane.add(scrollPane_Message);
 		
 		textPane = new JTextPane();
@@ -982,12 +980,12 @@ public class Client extends JFrame
 		contentPane.add(toolBar);
 		
 		tglbtn_Bold = new JToggleButton("");
-		tglbtn_Bold.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/bold.png")));
+		tglbtn_Bold.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/bold.png")));
 		tglbtn_Bold.setBounds(10, 475, 39, 35);
 		contentPane.add(tglbtn_Bold);
 		
 		tglbtn_Italic = new JToggleButton("");
-		tglbtn_Italic.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/italic.png")));
+		tglbtn_Italic.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/italic.png")));
 		tglbtn_Italic.setBounds(49, 475, 39, 35);
 		contentPane.add(tglbtn_Italic);
 		
@@ -1009,14 +1007,14 @@ public class Client extends JFrame
 		toolBar.add(horizontalStrut_2);
 		
 		btn_Color = new JButton("");
-		btn_Color.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/color.png")));
+		btn_Color.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/color.png")));
 		toolBar.add(btn_Color);
 		
 		Component horizontalStrut = Box.createHorizontalStrut(180);
 		toolBar.add(horizontalStrut);
 		
 		btn_Config = new JButton("");
-		btn_Config.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/setting.png")));
+		btn_Config.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/setting.png")));
 		toolBar.add(btn_Config);
 		
 		popupMenu = new JPopupMenu();
@@ -1052,7 +1050,7 @@ public class Client extends JFrame
 		mnChangeIcon.add(mntmChangeIcon0);
 
 		btn_Enter = new JButton("");
-		btn_Enter.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/enter.png")));
+		btn_Enter.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/enter.png")));
 		btn_Enter.setBounds(560, 515, 60, 52);
 		btn_Enter.setEnabled(false);
 		contentPane.add(btn_Enter);
@@ -1077,12 +1075,12 @@ public class Client extends JFrame
 		contentPane.add(lblNewLabel);
 		
 		btn_AddFriend = new JButton("");
-		btn_AddFriend.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/add.png")));
+		btn_AddFriend.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/add.png")));
 		btn_AddFriend.setBounds(805, 306, 32, 28);
 		contentPane.add(btn_AddFriend);
 		
 		btn_DeleteFriend = new JButton("");
-		btn_DeleteFriend.setIcon(new ImageIcon(ClientGUI.class.getResource("/client/Icons/del.png")));
+		btn_DeleteFriend.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/del.png")));
 		btn_DeleteFriend.setBounds(770, 306, 32, 28);
 		contentPane.add(btn_DeleteFriend);
 		
