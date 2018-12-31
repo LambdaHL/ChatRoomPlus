@@ -2,17 +2,12 @@ package server;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-
-import client.MessageRecordFrame;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.*;
-import java.text.SimpleDateFormat;
 import java.io.*;
 import java.util.ArrayList;
 import java.net.*;
-import java.util.Date; 
 
 public class Server extends JFrame
 {
@@ -170,6 +165,7 @@ public class Server extends JFrame
 		private String userName,userNickName,icon,terminateString;
 		private PrintWriter printWriter;
 		private BufferedReader bufferedReader;
+		private DataInputStream dataInputStream;
 		private String string;
 		private boolean isLogged,isLoggedout;
 		private String fontName;
@@ -411,6 +407,18 @@ public class Server extends JFrame
 							printWriter.flush();
 							continue;
 						}
+						
+						if(string.equals("#Send File"))
+						{
+							String targetName=bufferedReader.readLine();
+							String fileName=bufferedReader.readLine();
+							byte[] bytes=new byte[2048];
+							int len=Integer.parseInt(bufferedReader.readLine());
+							while(dataInputStream.available()==0) {}
+							dataInputStream.read(bytes, 0, len);
+							new SendFile(targetName, fileName, bytes, len).start();
+							continue;
+						}
 					}
 				}
 			}
@@ -438,6 +446,7 @@ public class Server extends JFrame
 			isLoggedout=false;
 			try
 			{
+				dataInputStream=new DataInputStream(socket.getInputStream());
 				printWriter=new PrintWriter(socket.getOutputStream());
 				bufferedReader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			}
@@ -540,6 +549,49 @@ public class Server extends JFrame
 			catch (Exception e)
 			{
 				e.printStackTrace();
+			}
+		}
+		
+		class SendFile extends Thread
+		{
+			String target,fileName;
+			int len;
+			byte[] bytes;
+			public SendFile(String target,String fileName,byte[] bytes,int len)
+			{
+				this.target=target;
+				this.fileName=fileName;
+				this.bytes=bytes;
+				this.len=len;
+			}
+			
+			@Override
+			public void run()
+			{
+				try
+				{
+					for(int i=0;i<userList.size();i++)
+					{
+						if(userList.get(i).name.equals(target))
+						{
+							Socket socket=userList.get(i).socket;
+							PrintWriter pWriter=new PrintWriter(socket.getOutputStream());
+							pWriter.println("#File");
+							pWriter.println(fileName);
+							pWriter.println(userName);
+							pWriter.flush();
+							sleep(250);
+							DataOutputStream dataOutputStream=new DataOutputStream(socket.getOutputStream());
+							dataOutputStream.write(bytes, 0, len);
+							dataOutputStream.flush();
+							break;
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
 			}
 		}
 	}

@@ -43,6 +43,7 @@ public class Client extends JFrame
 	private ArrayList<User> userList;
 	private Color color;
 	private ArrayList<PrivateChat> pChatList;
+	private DataOutputStream dataOutputStream;
 	
 	public Client()
 	{
@@ -65,6 +66,7 @@ public class Client extends JFrame
 					socket=new Socket("127.0.0.1", 2018);
 					printWriter=new PrintWriter(socket.getOutputStream());
 					bufferedReader=new BufferedReader(new InputStreamReader(socket.getInputStream()));
+					dataOutputStream=new DataOutputStream(socket.getOutputStream());
 					label_ServerStatus.setText("Server Status:Connected");
 					label_ServerStatus.setForeground(Color.GREEN);
 					break;
@@ -167,6 +169,35 @@ public class Client extends JFrame
 								new MessageRecordFrame(strings);
 								continue;
 							}
+							
+							if(string.equals("#File"))
+							{
+								String fileName=bufferedReader.readLine();
+								String sourceName=bufferedReader.readLine();
+								byte[] bytes=new byte[2048];
+								DataInputStream dataInputStream=new DataInputStream(socket.getInputStream());
+								int len=dataInputStream.read(bytes);
+								JFileChooser jFileChooser=new JFileChooser();
+								jFileChooser.setMultiSelectionEnabled(false);
+								jFileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+								if(JOptionPane.showConfirmDialog(null, new JLabel("Save or ignore?"), sourceName+" send you a file", JOptionPane.YES_NO_OPTION)==JOptionPane.OK_OPTION)
+								{
+									if(jFileChooser.showSaveDialog(null)==JFileChooser.APPROVE_OPTION)
+									{
+										File file=new File(jFileChooser.getSelectedFile(), fileName);
+										if(!file.exists())
+											file.createNewFile();
+										DataOutputStream dataOutputStream=new DataOutputStream(new FileOutputStream(file));
+										dataOutputStream.write(bytes, 0, len);
+										dataOutputStream.close();
+									}
+								}
+								else
+								{
+									dataInputStream.skip(dataInputStream.available());
+								}
+								continue;
+							}
 						}
 					}
 				}
@@ -174,6 +205,42 @@ public class Client extends JFrame
 				{
 					e.printStackTrace();
 				}
+			}
+		}
+	}
+	
+	class FileThread extends Thread
+	{
+		String targetName;
+		File file;
+		
+		public FileThread(File file,String targetName) 
+		{
+			this.file=file;
+			this.targetName=targetName;
+		}
+		
+		@Override
+		public void run()
+		{
+			try
+			{
+				printWriter.println("#Send File");
+				printWriter.flush();
+				printWriter.println(targetName);
+				printWriter.println(file.getName());
+				DataInputStream dataInputStream=new DataInputStream(new FileInputStream(file));
+				byte[] bytes=new byte[2048];
+				int len=dataInputStream.read(bytes);
+				printWriter.println(len+"\r");
+				printWriter.flush();
+				sleep(250);
+				dataOutputStream.write(bytes,0,len);
+				dataOutputStream.flush();
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
 			}
 		}
 	}
@@ -308,7 +375,7 @@ public class Client extends JFrame
 		private JScrollPane scrollPane;
 		private JLabel label_Me,label_Target;
 		private JToggleButton tglbtn_Bold,tglbtn_Italic;
-		private JButton button_Color,button_SendFile,btn_Enter;
+		private JButton button_Color,button_SendFile,button_Enter;
 		private JComboBox comboBox_Font,comboBox_Size;	
 		private JTextPane textPane;
 		private JTextField textField;
@@ -570,11 +637,11 @@ public class Client extends JFrame
 			textField.setColumns(10);
 			textField.setFont(font);
 			
-			btn_Enter = new JButton("");
-			btn_Enter.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/enter.png")));
-			btn_Enter.setBounds(386, 465, 49, 68);
-			btn_Enter.setEnabled(false);
-			contentPane.add(btn_Enter);
+			button_Enter = new JButton("");
+			button_Enter.setIcon(new ImageIcon(Client.class.getResource("/client/Icons/enter.png")));
+			button_Enter.setBounds(386, 465, 49, 68);
+			button_Enter.setEnabled(false);
+			contentPane.add(button_Enter);
 
 			scrollPane = new JScrollPane();
 			scrollPane.setAutoscrolls(true);
@@ -887,15 +954,15 @@ public class Client extends JFrame
 				public void keyReleased(KeyEvent e)
 				{
 					if(textField.getText().isEmpty())
-						btn_Enter.setEnabled(false);
+						button_Enter.setEnabled(false);
 					else
-						btn_Enter.setEnabled(true);
-					if(e.getKeyChar()==KeyEvent.VK_ENTER && btn_Enter.isEnabled())
-						btn_Enter.doClick();
+						button_Enter.setEnabled(true);
+					if(e.getKeyChar()==KeyEvent.VK_ENTER && button_Enter.isEnabled())
+						button_Enter.doClick();
 				}
 			});
 			
-			btn_Enter.addActionListener(new ActionListener() 
+			button_Enter.addActionListener(new ActionListener() 
 			{
 				@Override
 				public void actionPerformed(ActionEvent e) 
@@ -919,7 +986,24 @@ public class Client extends JFrame
 					printWriter.flush();
 					appendMessage(time, userName, message);
 					textField.setText("");
-					btn_Enter.setEnabled(false);
+					button_Enter.setEnabled(false);
+				}
+			});
+			
+			button_SendFile.addActionListener(new ActionListener()
+			{
+				@Override
+				public void actionPerformed(ActionEvent e) 
+				{
+					JFileChooser jFileChooser=new JFileChooser();
+					jFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+					jFileChooser.setMultiSelectionEnabled(false);
+					int op=jFileChooser.showOpenDialog(new JLabel("Select file to send"));
+					if(op==JFileChooser.APPROVE_OPTION)
+					{
+						File file=jFileChooser.getSelectedFile();
+						new FileThread(file, targetName).start();
+					}
 				}
 			});
 		}
